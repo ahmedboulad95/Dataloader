@@ -1,0 +1,15 @@
+{
+  "name": "customdataloader",
+  "version": "1.0.0",
+  "description": "Custom data loader to pull records and related records from salesforce and push them to a sandbox",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ahmed Boulad",
+  "license": "ISC",
+  "dependencies": {
+    "fs": "0.0.1-security",
+    "jsforce": "^1.9.1"
+  }
+}
