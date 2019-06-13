@@ -91,6 +91,18 @@ conn.login(
 
           getMetadata(lookupObjects).then((response) => {
             lookupObjects = response;
+
+            // Grab all of the related record ids
+            for (key in lookupObjects) {
+              lookupObjects[key].recordIds = [];
+              records.forEach((loan) => {
+                lookupObjects[key].fields.forEach((field) => {
+                  if(loan[field])
+                    lookupObjects[key].recordIds.push(loan[field]);
+                });
+              });
+            }
+
             /*fs.writeFile(
               "lookupObjects.json",
               JSON.stringify(lookupObjects),
@@ -98,14 +110,21 @@ conn.login(
                 if (err) console.log("Error writing file :: " + err);
               }
             );*/
-          });
 
-          relObjectsMap.forEach((relObject) => {
-            let recIds = [];
-            records.forEach((loan) => {
-              recIds.push(loan[relObject.lookupName]);
-            });
-            relObjectRecordIds.push(recIds);
+            // Build query for each related object
+            let relatedRecords = [];
+            let keys = Object.keys(lookupObjects);
+            for (let i = 0; i < keys.length; i++) {
+              let relQueryString = "SELECT ";
+              let relFields = [];
+              lookupObjects[keys[i]].metadata.fields.forEach((element) => {
+                relFields.push(element.name);
+              });
+              relQueryString += relFields.join(",");
+
+              relQueryString += " FROM " + keys[i] + " WHERE ";
+              //lookupObjects[keys[i]]
+            }
           });
 
           //console.log("Related Records :: " + relObjectRecordIds);
@@ -133,22 +152,22 @@ function getMetadata(lookupObjects) {
     for (let i = 0; i < keys.length; i++) {
       //lookupObjects.forEach((obj) => {
       // Fetch the metadata for each related object
-      
+
       conn.sobject(keys[i]).describe((err, relObjMetadata) => {
         if (err) reject(err);
         //console.log((relObjMetadata) ? "" : "Undefined for " + keys[i]);
-  
+
         // Write the metadata out to a file
         /*let fileName = objectName + '.json';
                     fs.writeFile(fileName, JSON.stringify(relObjMetadata), (err) => {
                         if(err) console.log('Error writing file :: ' + err);
                     });*/
-  
+
         // Add metadata to related objects map
         relObjectsMap[keys[i]].metadata = relObjMetadata;
 
         // Return the map if on the last element
-        if(counter === keys.length - 1) {
+        if (counter === keys.length - 1) {
           resolve(relObjectsMap);
         }
         counter++;
