@@ -1,5 +1,6 @@
 const jsforce = require("jsforce");
 const fs = require("fs");
+const permittedObjects = require('./permittedObjects.js');
 
 // Establish a connection to Salesforce
 var loginOptions = {
@@ -25,18 +26,8 @@ conn.login(
       if (err) console.log("Error :: " + err);
 
       console.log("Successfully retrieved Loan__c metadata");
-      // Write the metadata out to a file for easy viewing
-      /*fs.writeFile('response.json', JSON.stringify(metadata), function(err) {
-            if(err) console.log("Error writing file :: " + err);
-        });*/
 
-      // Objects that we don't need to insert
-      const omitObjects = ["Group", "User", "RecordType"];
-
-      let relObjectsMap = []; // Map for the related object metadata, indexed by field name
-      let relObjectRecordIds = []; // List that contains a list of record ids for each related object
       let lookupObjects = {};
-      //let lookupFields = [];
 
       console.log("Building initial lookup object...");
       // Loop through all the Loan object fields
@@ -47,10 +38,7 @@ conn.login(
           element.referenceTo.forEach(objectName => {
             //console.log(objectName);
             // Only add object if it hasn't been added already and it is not one of the omitted objects
-            if (
-              /*lookupObjects.indexOf(objectName) === -1 &&*/
-              omitObjects.indexOf(objectName) === -1
-            ) {
+            if (permittedObjects.indexOf(objectName) !== -1) {
               //lookupFields.push(element.name);
               //console.log("Element :: " + element.name);
               if (lookupObjects[objectName])
@@ -95,9 +83,9 @@ conn.login(
               if (err) console.log("Error writing file :: " + err);
             }
           );*/
-            console.log("Retrieved Loans successfully");
+          console.log("Retrieved Loans successfully");
 
-            console.log("Retrieving related object metadata...");
+          console.log("Retrieving related object metadata...");
           getMetadata(lookupObjects).then((response) => {
             console.log("Retrieved metadata successfully");
             lookupObjects = response;
@@ -114,59 +102,22 @@ conn.login(
               });
             }
 
-            /*fs.writeFile(
-              "lookupObjects.json",
-              JSON.stringify(lookupObjects),
-              function (err) {
-                if (err) console.log("Error writing file :: " + err);
-              }
-            );*/
+            console.log("Building queries for related objects...");
+            console.log("\n");
 
-              console.log("Building queries for related objects...");
-              console.log("\n");
             // Build query for each related object
-            let keys = Object.keys(lookupObjects);
-            for (let i = 0; i < keys.length; i++) {
-              if (lookupObjects[keys[i]].recordIds.length > 0) {
-                lookupObjects[keys[i]].records = [];
-                let relQueryString = "SELECT ";
-                let relFields = [];
-                lookupObjects[keys[i]].metadata.fields.forEach((element) => {
-                  relFields.push(element.name);
-                });
-                relQueryString += relFields.join(",");
 
-                relQueryString += " FROM " + keys[i] + " WHERE ";
-                let whereClauses = [];
-                let clause = "Id IN (";
-
-                let ids = [];
-                lookupObjects[keys[i]].recordIds.forEach((id) => {
-                  ids.push("'" + id + "'");
-                });
-                clause += ids.join(',');
-                clause += ') ';
-                whereClauses.push(clause);
-                relQueryString += whereClauses.join(' OR ');
-
-                console.log(relQueryString);
-                console.log("\n");
-
-                conn.query(relQueryString).on("record", (record) => {
-                  lookupObjects[keys[i]].records.push(record);
-                }).on("end", () => {
-                  /*fs.writeFile(
-                    "lookupObjects.json",
-                    JSON.stringify(lookupObjects),
-                    function (err) {
-                      if (err) console.log("Error writing file :: " + err);
-                    }
-                  );*/
-                }).on("error", (err) => {
-                  console.log("Error :: " + err);
-                }).run({ autoFetch: true });
-              }
-            }
+            getRelatedObjects(lookupObjects).then((response) => {
+              console.log("Adding related records to lookup object... ");
+              lookupObjects = response;
+              /*fs.writeFile(
+                "lookupObjects.json",
+                JSON.stringify(lookupObjects),
+                function (err) {
+                  if (err) console.log("Error writing file :: " + err);
+                }
+              );*/
+            });
           });
 
           //console.log("Related Records :: " + relObjectRecordIds);
@@ -216,4 +167,63 @@ function getMetadata(lookupObjects) {
       });
     }
   })
+}
+
+function getRelatedObjects(obj) {
+  return new Promise((resolve, reject) => {
+    let lookupObjects = obj;
+    let counter = 0;
+    let numObjects = 0;
+    let keys = Object.keys(lookupObjects);
+    for (let i = 0; i < keys.length; i++) {
+      if (lookupObjects[keys[i]].recordIds.length > 0) {
+        numObjects++;
+        lookupObjects[keys[i]].records = [];
+        let relQueryString = "SELECT ";
+        let relFields = [];
+        lookupObjects[keys[i]].metadata.fields.forEach((element) => {
+          relFields.push(element.name);
+        });
+        relQueryString += relFields.join(",");
+
+        relQueryString += " FROM " + keys[i] + " WHERE ";
+        let whereClauses = [];
+        let clause = "Id IN (";
+
+        let ids = [];
+        lookupObjects[keys[i]].recordIds.forEach((id) => {
+          ids.push("'" + id + "'");
+        });
+        clause += ids.join(',');
+        clause += ') ';
+        whereClauses.push(clause);
+        relQueryString += whereClauses.join(' OR ');
+
+        console.log(relQueryString);
+        console.log("\n");
+
+        conn.query(relQueryString).on("record", (record) => {
+          lookupObjects[keys[i]].records.push(record);
+        }).on("end", () => {
+          console.log("Num Objects :: " + numObjects);
+          console.log("in end");
+          console.log(counter);
+          if (counter === numObjects-1) {
+            console.log("Fetching related objects completed");
+            resolve(lookupObjects);
+          }
+          counter++;
+          /*fs.writeFile(
+            "lookupObjects.json",
+            JSON.stringify(lookupObjects),
+            function (err) {
+              if (err) console.log("Error writing file :: " + err);
+            }
+          );*/
+        }).on("error", (err) => {
+          console.log("Error :: " + err);
+        }).run({ autoFetch: true });
+      }
+    }
+  });
 }
