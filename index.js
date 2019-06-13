@@ -106,7 +106,6 @@ conn.login(
             console.log("\n");
 
             // Build query for each related object
-
             getRelatedObjects(lookupObjects).then((response) => {
               console.log("Adding related records to lookup object... ");
               lookupObjects = response;
