@@ -1,5 +1,6 @@
 const jsforce = require("jsforce");
 const fs = require("fs");
+//const {Parser} = require('json2csv');
 const permittedObjects = require('./permittedObjects.js');
 
 // Establish a connection to Salesforce
@@ -7,6 +8,8 @@ var loginOptions = {
   loginUrl: "https://test.salesforce.com"
 };
 let conn = new jsforce.Connection(loginOptions);
+
+//let parser = new Parser();
 
 console.log("Logging into Salesforce...");
 conn.login(
@@ -86,6 +89,15 @@ conn.login(
               if (err) console.log("Error writing file :: " + err);
             }
           );*/
+            /*const csv = parser.parse(records);
+            fs.writeFile(
+              "loans.csv",
+              csv,
+              function (err) {
+                if (err) console.log("Error writing file :: " + err);
+              }
+            );*/
+
           console.log("Retrieved Loans successfully");
 
           console.log("Retrieving related object metadata...");
