@@ -60,12 +60,15 @@ conn.login(
       let queryString = "SELECT ";
       let fields = [];
       metadata.fields.forEach((element) => {
-        fields.push(element.name);
+        if(element.updateable || element.name.includes("__c") || element.name === 'Id')
+          fields.push(element.name);
       });
 
       queryString += fields.join(",");
 
       queryString += " FROM Loan__c LIMIT 20";
+
+      //console.log("- Loan Query :: " + queryString);
 
       console.log("Querying for Loans...");
       let records = [];
@@ -109,13 +112,47 @@ conn.login(
             getRelatedObjects(lookupObjects).then((response) => {
               console.log("Adding related records to lookup object... ");
               lookupObjects = response;
-              /*fs.writeFile(
-                "lookupObjects.json",
-                JSON.stringify(lookupObjects),
-                function (err) {
-                  if (err) console.log("Error writing file :: " + err);
+
+              // Build lookup object for child records
+              let childLookupObjects = {};
+              metadata.childRelationships.forEach((rel) => {
+                if (permittedObjects.indexOf(rel.childSObject) !== -1) {
+                  if (childLookupObjects[rel.childSObject])
+                    childLookupObjects[rel.childSObject].fields.push(rel.field);
+                  else {
+                    childLookupObjects[rel.childSObject] = {};
+                    childLookupObjects[rel.childSObject].fields = [];
+                    childLookupObjects[rel.childSObject].fields.push(rel.field);
+                  }
                 }
-              );*/
+              });
+
+              console.log(childLookupObjects);
+
+              getMetadata(childLookupObjects).then((response) => {
+                childLookupObjects = response;
+
+                let loanIds = [];
+                records.forEach((loan) => {
+                  loanIds.push(loan.Id);
+                });
+
+                //console.log("Loan Ids :: " + loanIds);
+
+                getRelatedChildObjects(childLookupObjects, loanIds).then((response) => {
+                  console.log("Child records retrieved");
+                  childLookupObjects = response;
+                  /*fs.writeFile(
+                    "childLookupObjects.json",
+                    JSON.stringify(childLookupObjects),
+                    function (err) {
+                      if (err) console.log("Error writing file :: " + err);
+                    }
+                  );*/
+                });
+
+              });
+
             });
           });
 
@@ -181,7 +218,8 @@ function getRelatedObjects(obj) {
         let relQueryString = "SELECT ";
         let relFields = [];
         lookupObjects[keys[i]].metadata.fields.forEach((element) => {
-          relFields.push(element.name);
+          if(element.updateable || element.name.includes("__c") || element.name === 'Id')
+            relFields.push(element.name);
         });
         relQueryString += relFields.join(",");
 
@@ -207,7 +245,7 @@ function getRelatedObjects(obj) {
           console.log("Num Objects :: " + numObjects);
           console.log("in end");
           console.log(counter);
-          if (counter === numObjects-1) {
+          if (counter === numObjects - 1) {
             console.log("Fetching related objects completed");
             resolve(lookupObjects);
           }
@@ -223,6 +261,56 @@ function getRelatedObjects(obj) {
           console.log("Error :: " + err);
         }).run({ autoFetch: true });
       }
+    }
+  });
+}
+
+function getRelatedChildObjects(obj, recordIds) {
+  return new Promise((resolve, reject) => {
+    let childLookupObjects = obj;
+    let counter = 0;
+    let keys = Object.keys(childLookupObjects);
+    for (let i = 0; i < keys.length; i++) {
+      childLookupObjects[keys[i]].records = [];
+      let relQueryString = "SELECT ";
+      let relFields = [];
+      let whereClauses = [];
+
+      childLookupObjects[keys[i]].metadata.fields.forEach((element) => {
+        if(element.updateable || element.name.includes("__c") || element.name === 'Id')
+          relFields.push(element.name);
+      });
+      relQueryString += relFields.join(",");
+
+      relQueryString += " FROM " + keys[i] + " WHERE ";
+
+      childLookupObjects[keys[i]].fields.forEach((element) => {
+        let clause = element + " IN (";
+        let ids = [];
+        recordIds.forEach((id) => {
+          ids.push("'" + id + "'");
+        });
+        clause += ids.join(',');
+        clause += ') ';
+        whereClauses.push(clause);
+      })
+ 
+      relQueryString += whereClauses.join(' OR ');
+
+      //console.log(relQueryString);
+      //console.log("\n");
+
+      conn.query(relQueryString).on("record", (record) => {
+        childLookupObjects[keys[i]].records.push(record);
+      }).on("end", () => {
+        if (counter === keys.length - 1) {
+          console.log("Fetching related child records completed");
+          resolve(childLookupObjects);
+        }
+        counter++;
+      }).on("error", (err) => {
+        console.log("Error fetching children :: " + err);
+      }).run({ autoFetch: true });
     }
   });
 }
