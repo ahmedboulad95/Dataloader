@@ -14,14 +14,11 @@ console.log("ENV vars " + process.env.SF_PASSWORD);
 var loginOptions = {
     loginUrl: process.env.SF_DEV_LOGIN
 };
+
 let conn = new jsforce.Connection(loginOptions);
-
 let recordObj = {};
-
 let objMetadata = {};
-
 let stack = [];
-
 let continueRecurse = true;
 
 console.log("Logging into Salesforce...");

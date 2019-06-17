@@ -32,6 +32,7 @@ getChildRelationshipRecords : In getChild RelationshipRecords :: FlowRecordRelat
 getChildRelationshipRecords : In getChild RelationshipRecords :: Loan__c Loan__c
 getChildRelationshipRecords : In getChild RelationshipRecords :: Note Loan__c
 getChildRelationshipRecords : In getChild RelationshipRecords :: NoteAndAttachment Loan__c
+getChildRelationshipRecords : In getChild RelationshipRecords :: Payment__c Loan__c
 getChildRelationshipRecords : In getChild RelationshipRecords :: ProcessInstance Loan__c
 getChildRelationshipRecords : In getChild RelationshipRecords :: ProcessInstanceHistory Loan__c
 getChildRelationshipRecords : In getChild RelationshipRecords :: RecordAction Loan__c
@@ -149,6 +150,7 @@ getLookupRecords : In getLookupRecords :: User Lender__c
 getLookupRecords : In getLookupRecords ::  Lender__c
 getLookupRecords : In getLookupRecords ::  Lender__c
 getLookupRecords : In getLookupRecords ::  Lender__c
+getLookupRecords : In getLookupRecords :: Dealer__c Lender__c
 getRecordsDFS : Back from getLookupObjects
 getRecordsDFS : Stack :: [{"currentObj":"Loan__c","parentObj":"Lender__c"}]
 getRecordsDFS : Returned from getObjectMetadata
