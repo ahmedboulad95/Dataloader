@@ -212,7 +212,7 @@ function getChildRelationshipRecords(currentObj, currentObjMetadata, parentObj) 
                     }
 
                     if (counter === numObjects - 1) {
-                        continueRecurse
+                        //continueRecurse
                         resolve();
                     }
                     counter++;
