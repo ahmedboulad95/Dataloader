@@ -3,7 +3,6 @@
 const jsforce = require("jsforce");
 const fs = require("fs");
 const permittedObjects = require('./permittedObjects.js');
-const StackItem = require('./stackItem.js');
 
 require('dotenv').config();
 
