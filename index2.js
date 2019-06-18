@@ -6,10 +6,6 @@ const permittedObjects = require('./permittedObjects.js');
 
 require('dotenv').config();
 
-console.log("ENV vars " + process.env.SF_USERNAME);
-console.log("ENV vars " + process.env.SF_LOGIN_URL);
-console.log("ENV vars " + process.env.SF_PASSWORD);
-
 // Establish a connection to Salesforce
 var loginOptions = {
     loginUrl: process.env.SF_DEV_LOGIN

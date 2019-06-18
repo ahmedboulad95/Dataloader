@@ -1,6 +1,3 @@
-ENV vars aboulad@autoidinc.com
-ENV vars https://test.salesforce.com
-ENV vars Ahmdb_95_partialILZWV1mHuUZU6pv48WjzIQtV
 Logging into Salesforce...
 Instance :: https://ahmedboulad-dev-ed.my.salesforce.com
 Starting DFS
