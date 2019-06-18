@@ -9,8 +9,10 @@
   "author": "Ahmed Boulad",
   "license": "ISC",
   "dependencies": {
+    "dotenv": "^8.0.0",
     "fs": "0.0.1-security",
-    "jsforce": "^1.9.1"
+    "jsforce": "^1.9.1",
+    "json2csv": "^4.5.1"
   },
   "devDependencies": {
     "nodemon": "^1.19.1"
