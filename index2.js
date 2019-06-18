@@ -354,3 +354,21 @@ function fetchRecords(currentObj, metadata, relField, recIds) {
         }).run({ autoFetch: true });
     });
 }
+
+function insertRecords(records, objectName) {
+    return new Promise((resolve, reject) => {
+        conn.sobject(objectName).create(records, { allowRecursive: true }, (err, ret) => {
+            if(err) reject(err);
+            else resolve(ret);
+        });
+    });
+}
+
+function updateRecords(records, objectName) {
+    return new Promise((resolve, reject) => {
+        conn.sobject(objectName).update(records, { allowRecursive:true }, (err, ret) => {
+            if(err) reject(err);
+            else resolve(ret);
+        });
+    });
+}
