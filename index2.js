@@ -15,22 +15,22 @@ let conn = new jsforce.Connection(loginOptions);
 let recordObj = {};
 let objMetadata = {};
 let stack = [];
-let continueRecurse = true;
+let continueRecurse = false;
 
-console.log("Logging into Salesforce...");
+//console.log("Logging into Salesforce...");
 conn.login(process.env.SF_DEV_USER, process.env.SF_DEV_PASS, function (err, userInfo) {
-    console.log("Instance :: " + conn.instanceUrl);
+    //    console.log("Instance :: " + conn.instanceUrl);
     let currentObj = process.argv[2];
     let limit = process.argv[3];
     if (!currentObj || !limit)
         throw "Object and limit are required";
-    console.log("Starting DFS");
+    //    console.log("Starting DFS");
     startDFS(currentObj, limit);
 });
 
 function startDFS(currentObj, limit) {
     getObjectMetadata(currentObj).then((metadata) => {
-        console.log("startDFS : Got object metadata for " + currentObj);
+        //        console.log("startDFS : Got object metadata for " + currentObj);
         let queryString = "SELECT ";
         let fields = [];
         metadata.fields.forEach((field) => {
@@ -46,17 +46,17 @@ function startDFS(currentObj, limit) {
         conn.query(queryString).on("record", (record) => {
             records.push(record);
         }).on("end", () => {
-            console.log("startDFS : Retrieved all " + currentObj + " records");
-            continueRecurse = true;
+            //            console.log("startDFS : Retrieved all " + currentObj + " records");
+            //continueRecurse = true;
             recordObj[currentObj] = [];
             records.forEach((record) => {
                 recordObj[currentObj].push(record);
             });
 
-            console.log("startDFS : Starting getRecordsDFS");
+            //            console.log("startDFS : Starting getRecordsDFS");
             metadata.childRelationships.forEach((rel) => {
                 if (permittedObjects.indexOf(rel.childSObject) !== -1) {
-                    console.log("startDFS : childRelationship Related object + Current Object :: " + rel.childSObject + " " + currentObj);
+                    //                    console.log("startDFS : childRelationship Related object + Current Object :: " + rel.childSObject + " " + currentObj);
                     //getRecordsDFS(rel.childSObject, currentObj);
                     stack.push({ currentObj: rel.childSObject, parentObj: currentObj });
                 }
@@ -66,45 +66,52 @@ function startDFS(currentObj, limit) {
                 if (field.referenceTo.length > 0) {
                     field.referenceTo.forEach((ref) => {
                         if (permittedObjects.indexOf(ref) !== -1) {
-                            console.log("startDFS : lookup Related object + Current Object :: " + ref + " " + currentObj);
+                            //                            console.log("startDFS : lookup Related object + Current Object :: " + ref + " " + currentObj);
                             //getRecordsDFS(ref, currentObj);
                             stack.push({ currentObj: ref, parentObj: currentObj });
                         }
                     });
                 }
             });
-
+            //console.log("getRecordsDFS : Stack :: " + JSON.stringify(stack));
             //let nextItem = stack.pop();
             //console.log("startDFS : Next Item :: " + nextItem.currentObj + " " + nextItem.parentObj);
             getRecordsDFS();
         }).on("error", (err) => {
-            console.log("Error retrieving initial records");
+            //            console.log("Error retrieving initial records");
         }).run({ autoFetch: true });
     }).catch((err) => {
-        console.log("Error retrieving initial object metadata " + currentObj + " " + err);
+        //        console.log("Error retrieving initial object metadata " + currentObj + " " + err);
     });
 
 }
 
 function getRecordsDFS() {
     //while (stack.length > 0) {
+    console.log('\n');
     console.log("getRecordsDFS : Stack :: " + JSON.stringify(stack));
     let nextItem = stack.pop();
-
+    console.log(nextItem);
+    console.log('\n');
+    
     // Grab current object metadata
     if (nextItem) {
+        console.log("Next item valid");
         let currentObj = nextItem.currentObj;
         let parentObj = nextItem.parentObj;
         getObjectMetadata(currentObj).then((metadata) => {
-            console.log("getRecordsDFS : Returned from getObjectMetadata");
-            console.log("getRecordsDFS : Current Object :: " + currentObj);
+            console.log("Got object metadata");
+            //            console.log("getRecordsDFS : Returned from getObjectMetadata");
+            //            console.log("getRecordsDFS : Current Object :: " + currentObj);
             let currentObjMetadata = metadata;
             let newParentIds = [];
 
             getChildRelationshipRecords(currentObj, currentObjMetadata, parentObj).then(() => {
-                console.log("getRecordsDFS : Back from getChildRelationships");
+                console.log("Got child relationships")
+                //                console.log("getRecordsDFS : Back from getChildRelationships");
                 getLookupRecords(currentObj, currentObjMetadata, parentObj).then(() => {
-                    console.log("getRecordsDFS : Back from getLookupObjects");
+                    console.log("Got lookup records");
+                    //                    console.log("getRecordsDFS : Back from getLookupObjects");
                     fs.writeFile(
                         "recordObject.json",
                         JSON.stringify(recordObj),
@@ -113,9 +120,10 @@ function getRecordsDFS() {
                         }
                     );
                     if (continueRecurse) {
+                        console.log("Continue Recurse");
                         currentObjMetadata.childRelationships.forEach((rel) => {
                             if (permittedObjects.indexOf(rel.childSObject) !== -1) {
-                                console.log("getRecordsDFS : Related object + Current Object :: " + rel.childSObject + " " + currentObj);
+                                //                                console.log("getRecordsDFS : Related object + Current Object :: " + rel.childSObject + " " + currentObj);
                                 //getRecordsDFS(rel.childSObject, currentObj);
                                 let newItem = { currentObj: rel.childSObject, parentObj: currentObj };
                                 if (stack.indexOf(newItem) === -1)
@@ -128,7 +136,7 @@ function getRecordsDFS() {
                             if (field.referenceTo.length > 0) {
                                 field.referenceTo.forEach((ref) => {
                                     if (permittedObjects.indexOf(ref) !== -1) {
-                                        console.log("getRecordsDFS : Related object + Current Object :: " + ref + " " + currentObj);
+                                        //                                        console.log("getRecordsDFS : Related object + Current Object :: " + ref + " " + currentObj);
                                         //getRecordsDFS(ref, currentObj);
 
                                         let newItem = { currentObj: ref, parentObj: currentObj };
@@ -143,15 +151,20 @@ function getRecordsDFS() {
                         /*let nextItem = stack.pop();*/
 
                     }
+                    continueRecurse = false;
+                    
                     getRecordsDFS();
                 }).catch((err) => {
-                    console.log("Error getting lookup records :: " + err);
+                    //                    console.log("Error getting lookup records :: " + err);
+                    throw err;
                 })
             }).catch((err) => {
-                console.log("Error getting child relationship records :: " + err);
+                //                console.log("Error getting child relationship records :: " + err);
+                throw err;
             });
         }).catch((err) => {
-            console.log("Error getting current object metadata :: " + err);
+            //            console.log("Error getting current object metadata :: " + err);
+            throw err;
         });
     }
     //}
@@ -159,22 +172,23 @@ function getRecordsDFS() {
 }
 
 function getChildRelationshipRecords(currentObj, currentObjMetadata, parentObj) {
-    console.log("getChildRelationshipRecords : In getChildRelationshipRecords");
-    console.log("getChildRelationshipRecords : Current Object :: " + currentObj);
-    console.log("getChildRelationshipRecords : Parent Object :: " + parentObj);
+    //    console.log("getChildRelationshipRecords : In getChildRelationshipRecords");
+    //    console.log("getChildRelationshipRecords : Current Object :: " + currentObj);
+    //    console.log("getChildRelationshipRecords : Parent Object :: " + parentObj);
     return new Promise((resolve, reject) => {
         let counter = 0;
         let numObjects = 0;
         let childRels = [];
         for (let i = 0; i < currentObjMetadata.childRelationships.length; i++) {
             let rel = currentObjMetadata.childRelationships[i];
-            console.log("getChildRelationshipRecords : In getChild RelationshipRecords :: " + rel.childSObject + " " + parentObj);
+            //            console.log("getChildRelationshipRecords : In getChild RelationshipRecords :: " + rel.childSObject + " " + parentObj);
             if (rel.childSObject === parentObj) {
                 childRels.push(rel);
             }
         }
 
         if (childRels.length > 0) {
+            console.log("Stuck here");
             for (let i = 0; i < childRels.length; i++) {
                 numObjects++;
                 let rel = childRels[i];
@@ -185,17 +199,20 @@ function getChildRelationshipRecords(currentObj, currentObjMetadata, parentObj) 
 
                 // Need to grab the records based on Id In parentObj[rel.field]
                 fetchRecords(currentObj, currentObjMetadata, "Id", parentRelIds).then((records) => {
-                    console.log("getChildRelationshipRecords : Grabbed relationship records");
-                    if (records.length > 0) {
+                    console.log("Fetched records");
+                    //                    console.log("getChildRelationshipRecords : Grabbed relationship records");
+                    if (records && records.length > 0) {
                         if (recordObj[currentObj]) {
+                            console.log("Object in record object");
                             records.forEach((record) => {
                                 // Add the records to the global record object if they do not exist there
-                                console.log("getChildRels " + findObjectInList(recordObj[currentObj], record));
-                                if (findObjectInList(recordObj[currentObj], record)) {
+                                //                                console.log("getChildRels " + findObjectInList(recordObj[currentObj], record));
+                                let objInList = findObjectInList(recordObj[currentObj], record);
+                                console.log("Object in list :: " + objInList);
+                                if (!objInList) {
+                                    console.log("Record not in object yet. Adding now");
                                     recordObj[currentObj].push(record);
                                     continueRecurse = true;
-                                } else {
-                                    continueRecurse = false;
                                 }
                             });
                         } else {
@@ -205,6 +222,8 @@ function getChildRelationshipRecords(currentObj, currentObjMetadata, parentObj) 
                                 recordObj[currentObj].push(record);
                             });
                         }
+                    } else {
+                        console.log("No records");
                     }
 
                     if (counter === numObjects - 1) {
@@ -213,42 +232,43 @@ function getChildRelationshipRecords(currentObj, currentObjMetadata, parentObj) 
                     }
                     counter++;
                 }).catch((err) => {
+                    console.log("here " + err);
                     if (err !== "No ids to query with")
                         reject(err);
                 });
             }
         } else {
-            continueRecurse = false;
+            //continueRecurse = false;
             resolve();
         }
     });
 }
 
 function findObjectInList(arr, obj) {
-    arr.forEach((element) => {
-        if(element.Id === obj.Id)
-        {
-            console.log("Equal " + element.Id + " " + obj.Id);
+    for(let i = 0; i < arr.length; i++) {
+        if (arr[i].Id === obj.Id) {
+            console.log("Object already in list");
+            //            console.log("Equal " + element.Id + " " + obj.Id);
             return true;
         }
-    });
+    }
     return false;
 }
 
 function getLookupRecords(currentObj, currentObjMetadata, parentObj) {
-    console.log("getLookupRecords : In getLookupRecords");
-    console.log("getLookupRecords : Current Object :: " + currentObj);
-    console.log("getLookupRecords : Parent Object :: " + parentObj);
+    //    console.log("getLookupRecords : In getLookupRecords");
+    //    console.log("getLookupRecords : Current Object :: " + currentObj);
+    //    console.log("getLookupRecords : Parent Object :: " + parentObj);
     return new Promise((resolve, reject) => {
         let counter = 0;
         let numObjects = 0;
         let childRels = [];
         for (let i = 0; i < currentObjMetadata.fields.length; i++) {
             let field = currentObjMetadata.fields[i];
-            console.log("getLookupRecords : In getLookupRecords :: " + field.referenceTo + " " + parentObj);
+            //            console.log("getLookupRecords : In getLookupRecords :: " + field.referenceTo + " " + parentObj);
             if (field.referenceTo.length > 0 && field.referenceTo.includes(parentObj)) {
                 childRels.push(field);
-                console.log("getLookupRecords : Parent Records :: " + recordObj[parentObj].length);
+                //                console.log("getLookupRecords : Parent Records :: " + recordObj[parentObj].length);
                 // Need to grab the records based on field.name In ParentIds
             }
         }
@@ -263,24 +283,28 @@ function getLookupRecords(currentObj, currentObjMetadata, parentObj) {
                 });
 
                 fetchRecords(currentObj, currentObjMetadata, field.name, parentRelIds).then((records) => {
-                    console.log("getLookupRecords : Grabbed lookup records");
-                    if (recordObj[currentObj]) {
-                        records.forEach((record) => {
-                            // Add the records to the global record object if they do not exist there
-                            console.log("getLookups " + findObjectInList(recordObj[currentObj], record));
-                            if (findObjectInList(recordObj[currentObj], record)) {
+                    if (records && records.length > 0) {
+                        //                    console.log("getLookupRecords : Grabbed lookup records");
+                        if (recordObj[currentObj]) {
+                            console.log("Object in record object");
+                            records.forEach((record) => {
+                                // Add the records to the global record object if they do not exist there
+                                //                            console.log("getLookups " + findObjectInList(recordObj[currentObj], record));
+                                let objInList = findObjectInList(recordObj[currentObj], record);
+                                console.log("Object in list :: " + objInList);
+                                if (!objInList) {
+                                    console.log("Record not in object yet. Adding now");
+                                    recordObj[currentObj].push(record);
+                                    continueRecurse = true;
+                                }
+                            });
+                        } else {
+                            continueRecurse = true;
+                            recordObj[currentObj] = [];
+                            records.forEach((record) => {
                                 recordObj[currentObj].push(record);
-                                continueRecurse = true;
-                            } else {
-                                continueRecurse = false;
-                            }
-                        });
-                    } else {
-                        continueRecurse = true;
-                        recordObj[currentObj] = [];
-                        records.forEach((record) => {
-                            recordObj[currentObj].push(record);
-                        });
+                            });
+                        }
                     }
 
                     if (counter === numObjects - 1) {
@@ -288,15 +312,15 @@ function getLookupRecords(currentObj, currentObjMetadata, parentObj) {
                     }
                     counter++;
 
-                    console.log("getLookupRecords : Counter :: " + counter);
-                    console.log("getLookupRecords : Rel Length :: " + numObjects);
+                    //                    console.log("getLookupRecords : Counter :: " + counter);
+                    //                    console.log("getLookupRecords : Rel Length :: " + numObjects);
                 }).catch((err) => {
                     if (err !== "No ids to query with")
                         reject(err);
                 });
             }
         } else {
-            continueRecurse = false;
+            //continueRecurse = false;
             resolve();
         }
     });
@@ -335,15 +359,17 @@ function fetchRecords(currentObj, metadata, relField, recIds) {
         });
 
         if (ids.length === 0)
-            reject("No ids to query with");
+            resolve();
 
         queryString += ids.join(",");
         queryString += ')';
 
+        console.log("Query :: " + queryString);
         let records = [];
         conn.query(queryString).on("record", (record) => {
             records.push(record);
         }).on("end", () => {
+            console.log("Records Size :: " + records.length);
             resolve(records);
         }).on("error", (err) => {
             reject(err);
@@ -354,7 +380,7 @@ function fetchRecords(currentObj, metadata, relField, recIds) {
 function insertRecords(records, objectName) {
     return new Promise((resolve, reject) => {
         conn.sobject(objectName).create(records, { allowRecursive: true }, (err, ret) => {
-            if(err) reject(err);
+            if (err) reject(err);
             else resolve(ret);
         });
     });
@@ -362,8 +388,8 @@ function insertRecords(records, objectName) {
 
 function updateRecords(records, objectName) {
     return new Promise((resolve, reject) => {
-        conn.sobject(objectName).update(records, { allowRecursive:true }, (err, ret) => {
-            if(err) reject(err);
+        conn.sobject(objectName).update(records, { allowRecursive: true }, (err, ret) => {
+            if (err) reject(err);
             else resolve(ret);
         });
     });

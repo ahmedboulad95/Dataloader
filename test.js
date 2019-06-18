@@ -1,8 +1,4 @@
-let testObj = {
-    one: [],
-    two: "test"
-}
+let arr = ['one', 'two', 'three'];
 
-testObj.three.forEach((item) => {
-    console.log(item);
-});
+arr.push('four');
+console.log(arr.pop());

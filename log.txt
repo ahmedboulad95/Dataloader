@@ -1,452 +1,333 @@
-Logging into Salesforce...
-Instance :: https://ahmedboulad-dev-ed.my.salesforce.com
-Starting DFS
-startDFS : Got object metadata for Loan__c
-startDFS : Retrieved all Loan__c records
-startDFS : Starting getRecordsDFS
-startDFS : childRelationship Related object + Current Object :: Lender__c Loan__c
-startDFS : lookup Related object + Current Object :: Dealer__c Loan__c
-startDFS : lookup Related object + Current Object :: Transaction__c Loan__c
-startDFS : lookup Related object + Current Object :: Account Loan__c
-getRecordsDFS : Stack :: [{"currentObj":"Lender__c","parentObj":"Loan__c"},{"currentObj":"Dealer__c","parentObj":"Loan__c"},{"currentObj":"Transaction__c","parentObj":"Loan__c"},{"currentObj":"Account","parentObj":"Loan__c"}]
-getRecordsDFS : Returned from getObjectMetadata
-getRecordsDFS : Current Object :: Account
-getChildRelationshipRecords : In getChildRelationshipRecords
-getChildRelationshipRecords : Current Object :: Account
-getChildRelationshipRecords : Parent Object :: Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Account Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: AccountChangeEvent Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: AccountCleanInfo Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: AccountContactRole Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: AccountFeed Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: AccountHistory Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: AccountPartner Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: AccountPartner Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: AccountShare Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ActivityHistory Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Asset Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Asset Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Asset Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: AssetChangeEvent Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: AssetChangeEvent Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: AssetChangeEvent Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: AttachedContentDocument Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Attachment Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Case Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: CaseChangeEvent Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: CollaborationGroupRecord Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: CombinedAttachment Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Contact Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ContactChangeEvent Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ContentDistribution Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ContentDocumentLink Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ContentVersion Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Contract Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Dealer__c Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: DuplicateRecordItem Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: EmailMessage Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: EntitySubscription Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Event Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Event Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: EventChangeEvent Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: EventChangeEvent Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: EventRelationChangeEvent Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: FeedComment Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: FeedItem Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: FlowRecordRelation Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Lead Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: LeadChangeEvent Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Loan__c Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Note Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: NoteAndAttachment Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: OpenActivity Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Opportunity Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: OpportunityChangeEvent Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: OpportunityPartner Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Order Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: OrderChangeEvent Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: OutgoingEmail Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Partner Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Partner Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Payment__c Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ProcessInstance Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ProcessInstanceHistory Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: RecordAction Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Task Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Task Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: TaskChangeEvent Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: TaskChangeEvent Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: TopicAssignment Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: User Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: UserRole Loan__c
-getChildRelationshipRecords : Grabbed relationship records
-getRecordsDFS : Back from getChildRelationships
-getLookupRecords : In getLookupRecords
-getLookupRecords : Current Object :: Account
-getLookupRecords : Parent Object :: Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords :: Account Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords :: Account Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords :: User Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords :: User Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords :: User Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords :: DandBCompany Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getRecordsDFS : Back from getLookupObjects
-getRecordsDFS : Stack :: [{"currentObj":"Lender__c","parentObj":"Loan__c"},{"currentObj":"Dealer__c","parentObj":"Loan__c"},{"currentObj":"Transaction__c","parentObj":"Loan__c"}]
-getRecordsDFS : Returned from getObjectMetadata
-getRecordsDFS : Current Object :: Transaction__c
-getChildRelationshipRecords : In getChildRelationshipRecords
-getChildRelationshipRecords : Current Object :: Transaction__c
-getChildRelationshipRecords : Parent Object :: Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: AttachedContentDocument Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Attachment Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: CollaborationGroupRecord Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: CombinedAttachment Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ContentDistribution Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ContentDocumentLink Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ContentVersion Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: DuplicateRecordItem Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: EntitySubscription Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: EventChangeEvent Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: EventRelationChangeEvent Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: FeedComment Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: FeedItem Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: FlowRecordRelation Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Loan__c Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Note Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: NoteAndAttachment Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ProcessInstance Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ProcessInstanceHistory Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: RecordAction Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: TaskChangeEvent Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: TopicAssignment Loan__c
-getChildRelationshipRecords : Grabbed relationship records
-getRecordsDFS : Back from getChildRelationships
-getLookupRecords : In getLookupRecords
-getLookupRecords : Current Object :: Transaction__c
-getLookupRecords : Parent Object :: Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords :: Group,User Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords :: User Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords :: User Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords :: Lender__c Loan__c
-getRecordsDFS : Back from getLookupObjects
-getRecordsDFS : Stack :: [{"currentObj":"Lender__c","parentObj":"Loan__c"},{"currentObj":"Dealer__c","parentObj":"Loan__c"}]
-getRecordsDFS : Returned from getObjectMetadata
-getRecordsDFS : Current Object :: Dealer__c
-getChildRelationshipRecords : In getChildRelationshipRecords
-getChildRelationshipRecords : Current Object :: Dealer__c
-getChildRelationshipRecords : Parent Object :: Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: AttachedContentDocument Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Attachment Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: CollaborationGroupRecord Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: CombinedAttachment Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ContentDistribution Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ContentDocumentLink Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ContentVersion Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: DuplicateRecordItem Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: EntitySubscription Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: EventChangeEvent Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: EventRelationChangeEvent Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: FeedComment Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: FeedItem Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: FlowRecordRelation Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Loan__c Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Note Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: NoteAndAttachment Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Payment__c Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ProcessInstance Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ProcessInstanceHistory Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: RecordAction Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: TaskChangeEvent Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: TopicAssignment Loan__c
-getChildRelationshipRecords : Grabbed relationship records
-getRecordsDFS : Back from getChildRelationships
-getLookupRecords : In getLookupRecords
-getLookupRecords : Current Object :: Dealer__c
-getLookupRecords : Parent Object :: Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords :: Group,User Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords :: User Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords :: User Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords :: Account Loan__c
-getRecordsDFS : Back from getLookupObjects
-getRecordsDFS : Stack :: [{"currentObj":"Lender__c","parentObj":"Loan__c"}]
-getRecordsDFS : Returned from getObjectMetadata
-getRecordsDFS : Current Object :: Lender__c
-getChildRelationshipRecords : In getChildRelationshipRecords
-getChildRelationshipRecords : Current Object :: Lender__c
-getChildRelationshipRecords : Parent Object :: Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: AttachedContentDocument Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Attachment Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: CollaborationGroupRecord Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: CombinedAttachment Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ContentDistribution Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ContentDocumentLink Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ContentVersion Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: DuplicateRecordItem Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: EntitySubscription Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: EventChangeEvent Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: EventRelationChangeEvent Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: FeedComment Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: FeedItem Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: FlowRecordRelation Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Note Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: NoteAndAttachment Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ProcessInstance Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ProcessInstanceHistory Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: RecordAction Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: TaskChangeEvent Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: TopicAssignment Loan__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Transaction__c Loan__c
-getRecordsDFS : Back from getChildRelationships
-getLookupRecords : In getLookupRecords
-getLookupRecords : Current Object :: Lender__c
-getLookupRecords : Parent Object :: Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords :: Group,User Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords :: User Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords :: User Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords ::  Loan__c
-getLookupRecords : In getLookupRecords :: Loan__c Loan__c
-getLookupRecords : Parent Records :: 2
-getLookupRecords : In getLookupRecords :: Payment__c Loan__c
-getLookupRecords : Grabbed lookup records
-getLookupRecords : Counter :: 1
-getLookupRecords : Rel Length :: 1
-getRecordsDFS : Back from getLookupObjects
-getRecordsDFS : Related object + Current Object :: Transaction__c Lender__c
-getRecordsDFS : Related object + Current Object :: Loan__c Lender__c
-getRecordsDFS : Related object + Current Object :: Payment__c Lender__c
+
+
+getRecordsDFS : Stack :: [{"currentObj":"Lender__c","parentObj":"Payment__c"},{"currentObj":"Dealer__c","parentObj":"Payment__c"}]
+{ currentObj: 'Dealer__c', parentObj: 'Payment__c' }
+
+
+Next item valid
+Got object metadata
+Stuck here
+Query :: SELECT Id,OwnerId FROM Dealer__c WHERE Id IN ('a011U00000MRb3JQAT')
+Records Size :: 1
+Fetched records
+Got child relationships
+Got lookup records
+Continue Recurse
+
+
+getRecordsDFS : Stack :: [{"currentObj":"Lender__c","parentObj":"Payment__c"},{"currentObj":"Loan__c","parentObj":"Dealer__c"},{"currentObj":"Payment__c","parentObj":"Dealer__c"}]
+{ currentObj: 'Payment__c', parentObj: 'Dealer__c' }
+
+
+Next item valid
+Got object metadata
+Got child relationships
+Query :: SELECT Id,OwnerId,Dealer__c FROM Payment__c WHERE Dealer__c IN ('a011U00000MRb3JQAT')
+Records Size :: 1
+Object in record object
+Object already in list
+Object in list :: true
+Got lookup records
+
+
+getRecordsDFS : Stack :: [{"currentObj":"Lender__c","parentObj":"Payment__c"},{"currentObj":"Loan__c","parentObj":"Dealer__c"}]
+{ currentObj: 'Loan__c', parentObj: 'Dealer__c' }
+
+
+Next item valid
+Got object metadata
+Got child relationships
+Query :: SELECT Id,OwnerId,Dealer__c,Transaction__c FROM Loan__c WHERE Dealer__c IN ('a011U00000MRb3JQAT')
+Records Size :: 1
+Got lookup records
+Continue Recurse
+
+
+getRecordsDFS : Stack :: [{"currentObj":"Lender__c","parentObj":"Payment__c"},{"currentObj":"Lender__c","parentObj":"Loan__c"},{"currentObj":"Dealer__c","parentObj":"Loan__c"},{"currentObj":"Transaction__c","parentObj":"Loan__c"}]
+{ currentObj: 'Transaction__c', parentObj: 'Loan__c' }
+
+
+Next item valid
+Got object metadata
+Stuck here
+Query :: SELECT Id,OwnerId,Lender__c FROM Transaction__c WHERE Id IN ('a041U000008G2tcQAC')
+Records Size :: 1
+Fetched records
+Got child relationships
+Got lookup records
+Continue Recurse
+
+
+getRecordsDFS : Stack :: [{"currentObj":"Lender__c","parentObj":"Payment__c"},{"currentObj":"Lender__c","parentObj":"Loan__c"},{"currentObj":"Dealer__c","parentObj":"Loan__c"},{"currentObj":"Loan__c","parentObj":"Transaction__c"},{"currentObj":"Lender__c","parentObj":"Transaction__c"}]
+{ currentObj: 'Lender__c', parentObj: 'Transaction__c' }
+
+
+Next item valid
+Got object metadata
+Stuck here
+Query :: SELECT Id,OwnerId,Loan__c,Payment__c FROM Lender__c WHERE Id IN ('a021U000007Zch5QAC')
+Records Size :: 1
+Fetched records
+Got child relationships
+Got lookup records
+Continue Recurse
+
+
+getRecordsDFS : Stack :: [{"currentObj":"Lender__c","parentObj":"Payment__c"},{"currentObj":"Lender__c","parentObj":"Loan__c"},{"currentObj":"Dealer__c","parentObj":"Loan__c"},{"currentObj":"Loan__c","parentObj":"Transaction__c"},{"currentObj":"Transaction__c","parentObj":"Lender__c"},{"currentObj":"Loan__c","parentObj":"Lender__c"},{"currentObj":"Payment__c","parentObj":"Lender__c"}]
+{ currentObj: 'Payment__c', parentObj: 'Lender__c' }
+
+
+Next item valid
+Got object metadata
+Stuck here
+Query :: SELECT Id,OwnerId,Dealer__c FROM Payment__c WHERE Id IN ('a031U00000EAaGbQAL')
+Records Size :: 1
+Fetched records
+Object in record object
+Object already in list
+Object in list :: true
+Got child relationships
+Got lookup records
+
+
+getRecordsDFS : Stack :: [{"currentObj":"Lender__c","parentObj":"Payment__c"},{"currentObj":"Lender__c","parentObj":"Loan__c"},{"currentObj":"Dealer__c","parentObj":"Loan__c"},{"currentObj":"Loan__c","parentObj":"Transaction__c"},{"currentObj":"Transaction__c","parentObj":"Lender__c"},{"currentObj":"Loan__c","parentObj":"Lender__c"}]
+{ currentObj: 'Loan__c', parentObj: 'Lender__c' }
+
+
+Next item valid
+Got object metadata
+Stuck here
+Query :: SELECT Id,OwnerId,Dealer__c,Transaction__c FROM Loan__c WHERE Id IN ('a001U000009w9orQAA')
+Records Size :: 1
+Fetched records
+Object in record object
+Object already in list
+Object in list :: true
+Got child relationships
+Got lookup records
+
+
+getRecordsDFS : Stack :: [{"currentObj":"Lender__c","parentObj":"Payment__c"},{"currentObj":"Lender__c","parentObj":"Loan__c"},{"currentObj":"Dealer__c","parentObj":"Loan__c"},{"currentObj":"Loan__c","parentObj":"Transaction__c"},{"currentObj":"Transaction__c","parentObj":"Lender__c"}]
+{ currentObj: 'Transaction__c', parentObj: 'Lender__c' }
+
+
+Next item valid
+Got object metadata
+Got child relationships
+Query :: SELECT Id,OwnerId,Lender__c FROM Transaction__c WHERE Lender__c IN ('a021U000007Zch5QAC')
+Records Size :: 1
+Object in record object
+Object already in list
+Object in list :: true
+Got lookup records
+
+
+getRecordsDFS : Stack :: [{"currentObj":"Lender__c","parentObj":"Payment__c"},{"currentObj":"Lender__c","parentObj":"Loan__c"},{"currentObj":"Dealer__c","parentObj":"Loan__c"},{"currentObj":"Loan__c","parentObj":"Transaction__c"}]
+{ currentObj: 'Loan__c', parentObj: 'Transaction__c' }
+
+
+Next item valid
+Got object metadata
+Got child relationships
+Query :: SELECT Id,OwnerId,Dealer__c,Transaction__c FROM Loan__c WHERE Transaction__c IN ('a041U000008G2tcQAC')
+Records Size :: 1
+Object in record object
+Object already in list
+Object in list :: true
+Got lookup records
+
+
+getRecordsDFS : Stack :: [{"currentObj":"Lender__c","parentObj":"Payment__c"},{"currentObj":"Lender__c","parentObj":"Loan__c"},{"currentObj":"Dealer__c","parentObj":"Loan__c"}]
+{ currentObj: 'Dealer__c', parentObj: 'Loan__c' }
+
+
+Next item valid
+Got object metadata
+Stuck here
+Query :: SELECT Id,OwnerId FROM Dealer__c WHERE Id IN ('a011U00000MRb3JQAT')
+Records Size :: 1
+Fetched records
+Object in record object
+Object already in list
+Object in list :: true
+Got child relationships
+Got lookup records
+
+
+getRecordsDFS : Stack :: [{"currentObj":"Lender__c","parentObj":"Payment__c"},{"currentObj":"Lender__c","parentObj":"Loan__c"}]
+{ currentObj: 'Lender__c', parentObj: 'Loan__c' }
+
+
+Next item valid
+Got object metadata
+Got child relationships
+Query :: SELECT Id,OwnerId,Loan__c,Payment__c FROM Lender__c WHERE Loan__c IN ('a001U000009w9orQAA')
+Records Size :: 1
+Object in record object
+Object already in list
+Object in list :: true
+Got lookup records
+
+
+getRecordsDFS : Stack :: [{"currentObj":"Lender__c","parentObj":"Payment__c"}]
+{ currentObj: 'Lender__c', parentObj: 'Payment__c' }
+
+
+Next item valid
+Got object metadata
+Got child relationships
+Query :: SELECT Id,OwnerId,Loan__c,Payment__c FROM Lender__c WHERE Payment__c IN ('a031U00000EAaG7QAL','a031U00000EAaGbQAL')
+Records Size :: 2
+Object in record object
+Object in list :: false
+Record not in object yet. Adding now
+Object already in list
+Object in list :: true
+Got lookup records
+Continue Recurse
+
+
 getRecordsDFS : Stack :: [{"currentObj":"Transaction__c","parentObj":"Lender__c"},{"currentObj":"Loan__c","parentObj":"Lender__c"},{"currentObj":"Payment__c","parentObj":"Lender__c"}]
-getRecordsDFS : Returned from getObjectMetadata
-getRecordsDFS : Current Object :: Payment__c
-getChildRelationshipRecords : In getChildRelationshipRecords
-getChildRelationshipRecords : Current Object :: Payment__c
-getChildRelationshipRecords : Parent Object :: Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: AttachedContentDocument Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Attachment Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: CollaborationGroupRecord Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: CombinedAttachment Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ContentDistribution Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ContentDocumentLink Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ContentVersion Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: DuplicateRecordItem Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: EntitySubscription Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: EventChangeEvent Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: EventRelationChangeEvent Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: FeedComment Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: FeedItem Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: FlowRecordRelation Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Lender__c Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Note Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: NoteAndAttachment Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ProcessInstance Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ProcessInstanceHistory Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: RecordAction Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: TaskChangeEvent Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: TopicAssignment Lender__c
-getChildRelationshipRecords : Grabbed relationship records
-getRecordsDFS : Back from getChildRelationships
-getLookupRecords : In getLookupRecords
-getLookupRecords : Current Object :: Payment__c
-getLookupRecords : Parent Object :: Lender__c
-getLookupRecords : In getLookupRecords ::  Lender__c
-getLookupRecords : In getLookupRecords :: Group,User Lender__c
-getLookupRecords : In getLookupRecords ::  Lender__c
-getLookupRecords : In getLookupRecords ::  Lender__c
-getLookupRecords : In getLookupRecords ::  Lender__c
-getLookupRecords : In getLookupRecords :: User Lender__c
-getLookupRecords : In getLookupRecords ::  Lender__c
-getLookupRecords : In getLookupRecords :: User Lender__c
-getLookupRecords : In getLookupRecords ::  Lender__c
-getLookupRecords : In getLookupRecords ::  Lender__c
-getLookupRecords : In getLookupRecords ::  Lender__c
-getLookupRecords : In getLookupRecords :: Dealer__c Lender__c
-getLookupRecords : In getLookupRecords :: Account Lender__c
-getRecordsDFS : Back from getLookupObjects
+{ currentObj: 'Payment__c', parentObj: 'Lender__c' }
+
+
+Next item valid
+Got object metadata
+Stuck here
+Query :: SELECT Id,OwnerId,Dealer__c FROM Payment__c WHERE Id IN ('a031U00000EAaGbQAL','a031U00000EAaG7QAL')
+Records Size :: 2
+Fetched records
+Object in record object
+Object already in list
+Object in list :: true
+Object already in list
+Object in list :: true
+Got child relationships
+Got lookup records
+
+
 getRecordsDFS : Stack :: [{"currentObj":"Transaction__c","parentObj":"Lender__c"},{"currentObj":"Loan__c","parentObj":"Lender__c"}]
-getRecordsDFS : Returned from getObjectMetadata
-getRecordsDFS : Current Object :: Loan__c
-getChildRelationshipRecords : In getChildRelationshipRecords
-getChildRelationshipRecords : Current Object :: Loan__c
-getChildRelationshipRecords : Parent Object :: Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: AttachedContentDocument Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Attachment Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: CollaborationGroupRecord Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: CombinedAttachment Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ContentDistribution Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ContentDocumentLink Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ContentVersion Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: DuplicateRecordItem Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: EntitySubscription Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: EventChangeEvent Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: EventRelationChangeEvent Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: FeedComment Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: FeedItem Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: FlowRecordRelation Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Lender__c Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Note Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: NoteAndAttachment Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ProcessInstance Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ProcessInstanceHistory Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: RecordAction Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: TaskChangeEvent Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: TopicAssignment Lender__c
-getChildRelationshipRecords : Grabbed relationship records
-Equal a001U000009w9oDQAQ a001U000009w9oDQAQ
-getChildRels false
-Equal a001U000009w9oDQAQ a001U000009w9oDQAQ
-Equal a001U000009w9orQAA a001U000009w9orQAA
-getChildRels false
-Equal a001U000009w9orQAA a001U000009w9orQAA
-getRecordsDFS : Back from getChildRelationships
-getLookupRecords : In getLookupRecords
-getLookupRecords : Current Object :: Loan__c
-getLookupRecords : Parent Object :: Lender__c
-getLookupRecords : In getLookupRecords ::  Lender__c
-getLookupRecords : In getLookupRecords :: Group,User Lender__c
-getLookupRecords : In getLookupRecords ::  Lender__c
-getLookupRecords : In getLookupRecords ::  Lender__c
-getLookupRecords : In getLookupRecords ::  Lender__c
-getLookupRecords : In getLookupRecords :: User Lender__c
-getLookupRecords : In getLookupRecords ::  Lender__c
-getLookupRecords : In getLookupRecords :: User Lender__c
-getLookupRecords : In getLookupRecords ::  Lender__c
-getLookupRecords : In getLookupRecords ::  Lender__c
-getLookupRecords : In getLookupRecords ::  Lender__c
-getLookupRecords : In getLookupRecords :: Dealer__c Lender__c
-getLookupRecords : In getLookupRecords :: Transaction__c Lender__c
-getLookupRecords : In getLookupRecords :: Account Lender__c
-getRecordsDFS : Back from getLookupObjects
+{ currentObj: 'Loan__c', parentObj: 'Lender__c' }
+
+
+Next item valid
+Got object metadata
+Stuck here
+Query :: SELECT Id,OwnerId,Dealer__c,Transaction__c FROM Loan__c WHERE Id IN ('a001U000009w9orQAA','a001U000009w9oDQAQ')
+Records Size :: 2
+Fetched records
+Object in record object
+Object in list :: false
+Record not in object yet. Adding now
+Object already in list
+Object in list :: true
+Got child relationships
+Got lookup records
+Continue Recurse
+
+
+getRecordsDFS : Stack :: [{"currentObj":"Transaction__c","parentObj":"Lender__c"},{"currentObj":"Lender__c","parentObj":"Loan__c"},{"currentObj":"Dealer__c","parentObj":"Loan__c"},{"currentObj":"Transaction__c","parentObj":"Loan__c"}]
+{ currentObj: 'Transaction__c', parentObj: 'Loan__c' }
+
+
+Next item valid
+Got object metadata
+Stuck here
+Query :: SELECT Id,OwnerId,Lender__c FROM Transaction__c WHERE Id IN ('a041U000008G2tcQAC')
+Records Size :: 1
+Fetched records
+Object in record object
+Object already in list
+Object in list :: true
+Got child relationships
+Got lookup records
+
+
+getRecordsDFS : Stack :: [{"currentObj":"Transaction__c","parentObj":"Lender__c"},{"currentObj":"Lender__c","parentObj":"Loan__c"},{"currentObj":"Dealer__c","parentObj":"Loan__c"}]
+{ currentObj: 'Dealer__c', parentObj: 'Loan__c' }
+
+
+Next item valid
+Got object metadata
+Stuck here
+Query :: SELECT Id,OwnerId FROM Dealer__c WHERE Id IN ('a011U00000MRb3JQAT','a011U00000MRb39QAD')
+Records Size :: 2
+Fetched records
+Object in record object
+Object in list :: false
+Record not in object yet. Adding now
+Object already in list
+Object in list :: true
+Got child relationships
+Got lookup records
+Continue Recurse
+
+
+getRecordsDFS : Stack :: [{"currentObj":"Transaction__c","parentObj":"Lender__c"},{"currentObj":"Lender__c","parentObj":"Loan__c"},{"currentObj":"Loan__c","parentObj":"Dealer__c"},{"currentObj":"Payment__c","parentObj":"Dealer__c"}]
+{ currentObj: 'Payment__c', parentObj: 'Dealer__c' }
+
+
+Next item valid
+Got object metadata
+Got child relationships
+Query :: SELECT Id,OwnerId,Dealer__c FROM Payment__c WHERE Dealer__c IN ('a011U00000MRb3JQAT','a011U00000MRb39QAD')
+Records Size :: 1
+Object in record object
+Object already in list
+Object in list :: true
+Got lookup records
+
+
+getRecordsDFS : Stack :: [{"currentObj":"Transaction__c","parentObj":"Lender__c"},{"currentObj":"Lender__c","parentObj":"Loan__c"},{"currentObj":"Loan__c","parentObj":"Dealer__c"}]
+{ currentObj: 'Loan__c', parentObj: 'Dealer__c' }
+
+
+Next item valid
+Got object metadata
+Got child relationships
+Query :: SELECT Id,OwnerId,Dealer__c,Transaction__c FROM Loan__c WHERE Dealer__c IN ('a011U00000MRb3JQAT','a011U00000MRb39QAD')
+Records Size :: 2
+Object in record object
+Object already in list
+Object in list :: true
+Object already in list
+Object in list :: true
+Got lookup records
+
+
+getRecordsDFS : Stack :: [{"currentObj":"Transaction__c","parentObj":"Lender__c"},{"currentObj":"Lender__c","parentObj":"Loan__c"}]
+{ currentObj: 'Lender__c', parentObj: 'Loan__c' }
+
+
+Next item valid
+Got object metadata
+Got child relationships
+Query :: SELECT Id,OwnerId,Loan__c,Payment__c FROM Lender__c WHERE Loan__c IN ('a001U000009w9orQAA','a001U000009w9oDQAQ')
+Records Size :: 2
+Object in record object
+Object already in list
+Object in list :: true
+Object already in list
+Object in list :: true
+Got lookup records
+
+
 getRecordsDFS : Stack :: [{"currentObj":"Transaction__c","parentObj":"Lender__c"}]
-getRecordsDFS : Returned from getObjectMetadata
-getRecordsDFS : Current Object :: Transaction__c
-getChildRelationshipRecords : In getChildRelationshipRecords
-getChildRelationshipRecords : Current Object :: Transaction__c
-getChildRelationshipRecords : Parent Object :: Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: AttachedContentDocument Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Attachment Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: CollaborationGroupRecord Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: CombinedAttachment Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ContentDistribution Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ContentDocumentLink Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ContentVersion Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: DuplicateRecordItem Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: EntitySubscription Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: EventChangeEvent Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: EventRelationChangeEvent Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: FeedComment Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: FeedItem Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: FlowRecordRelation Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Loan__c Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: Note Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: NoteAndAttachment Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ProcessInstance Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: ProcessInstanceHistory Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: RecordAction Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: TaskChangeEvent Lender__c
-getChildRelationshipRecords : In getChild RelationshipRecords :: TopicAssignment Lender__c
-getRecordsDFS : Back from getChildRelationships
-getLookupRecords : In getLookupRecords
-getLookupRecords : Current Object :: Transaction__c
-getLookupRecords : Parent Object :: Lender__c
-getLookupRecords : In getLookupRecords ::  Lender__c
-getLookupRecords : In getLookupRecords :: Group,User Lender__c
-getLookupRecords : In getLookupRecords ::  Lender__c
-getLookupRecords : In getLookupRecords ::  Lender__c
-getLookupRecords : In getLookupRecords ::  Lender__c
-getLookupRecords : In getLookupRecords :: User Lender__c
-getLookupRecords : In getLookupRecords ::  Lender__c
-getLookupRecords : In getLookupRecords :: User Lender__c
-getLookupRecords : In getLookupRecords ::  Lender__c
-getLookupRecords : In getLookupRecords ::  Lender__c
-getLookupRecords : In getLookupRecords ::  Lender__c
-getLookupRecords : In getLookupRecords :: Lender__c Lender__c
-getLookupRecords : Parent Records :: 2
-getLookupRecords : Grabbed lookup records
-Equal a041U000008G2tcQAC a041U000008G2tcQAC
-getLookups false
-Equal a041U000008G2tcQAC a041U000008G2tcQAC
-getLookupRecords : Counter :: 1
-getLookupRecords : Rel Length :: 1
-getRecordsDFS : Back from getLookupObjects
+{ currentObj: 'Transaction__c', parentObj: 'Lender__c' }
+
+
+Next item valid
+Got object metadata
+Got child relationships
+Query :: SELECT Id,OwnerId,Lender__c FROM Transaction__c WHERE Lender__c IN ('a021U000007Zch5QAC','a021U000007Zch0QAC')
+Records Size :: 1
+Object in record object
+Object already in list
+Object in list :: true
+Got lookup records
+
+
 getRecordsDFS : Stack :: []
+undefined
+
+
