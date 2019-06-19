@@ -21,85 +21,109 @@ let continueRecurse = false;
 conn.login(process.env.SF_DEV_USER, process.env.SF_DEV_PASS, function (err, userInfo) {
     let currentObj = process.argv[2];
     let limit = process.argv[3];
-    
+
     if (!currentObj || !limit)
         throw "Object and limit are required";
 
-    startDFS(currentObj, limit);
+    startDFS(currentObj, limit).then(() => {
+        console.log("Returned from startDFS");
+        return getRecordsDFS();
+    }).then(() => {
+        fs.writeFile(
+            "recordObject.json",
+            JSON.stringify(recordObj),
+            function (err) {
+                if (err) console.log("Error writing file :: " + err);
+            }
+        );
+
+        
+    }).catch((err) => {
+        console.log(err);
+    });
 });
 
 // Grabs the records for the initial object and then starts the DFS algorithm to get all related records
 // See permittedObjects.js for a list of objects that are pulled
 function startDFS(currentObj, limit) {
-    // Get the metadata from SF for the initial object
-    getObjectMetadata(currentObj).then((metadata) => {
-        // Build the query for the initial object
-        let queryString = "SELECT ";
-        let fields = [];
-        metadata.fields.forEach((field) => {
-            // To avoid grabbing readonly fields
-            if (field.updateable || field.name.includes("__c") || field.name === "Id")
-                fields.push(field.name);
-        });
-        queryString += fields.join(",");
-
-        queryString += " FROM " + currentObj + " LIMIT ";
-        queryString += limit;
-
-        let records = [];
-
-        // Query for records from SF
-        conn.query(queryString).on("record", (record) => {
-            records.push(record);
-        }).on("end", () => {
-            // Add the retrieved records to the global records object
-            recordObj[currentObj] = [];
-            records.forEach((record) => {
-                recordObj[currentObj].push(record);
-            });
-
-            // Add each relationship to the stack for further exploration
-            // Child relationship: OtherObject -> CurrentObject
-            metadata.childRelationships.forEach((rel) => {
-                if (permittedObjects.indexOf(rel.childSObject) !== -1) {
-                    stack.push({ currentObj: rel.childSObject, parentObj: currentObj });
-                }
-            });
-
-            // Add each lookup field to the stack for further exploration
-            // Lookup: CurrentObject -> OtherObject
+    return new Promise((resolve, reject) => {
+        // Get the metadata from SF for the initial object
+        getObjectMetadata(currentObj).then((metadata) => {
+            // Build the query for the initial object
+            let queryString = "SELECT ";
+            let fields = [];
             metadata.fields.forEach((field) => {
-                if (field.referenceTo.length > 0) {
-                    field.referenceTo.forEach((ref) => {
-                        if (permittedObjects.indexOf(ref) !== -1) {
-                            stack.push({ currentObj: ref, parentObj: currentObj });
-                        }
-                    });
-                }
+                // To avoid grabbing readonly fields
+                if (field.updateable || field.name.includes("__c") || field.name === "Id")
+                    fields.push(field.name);
             });
+            queryString += fields.join(",");
 
-            // Start DFS
-            getRecordsDFS();
-        }).on("error", (err) => {
-            console.log("Error querying for initial object records");
-            throw err;
-        }).run({ autoFetch: true });
-    }).catch((err) => {
-        console.log("Error getting initial object metadata");
-        throw err;
-    });
+            queryString += " FROM " + currentObj + " LIMIT ";
+            queryString += limit;
+
+            let records = [];
+
+            // Query for records from SF
+            conn.query(queryString).on("record", (record) => {
+                records.push(record);
+            }).on("end", () => {
+                // Add the retrieved records to the global records object
+                recordObj[currentObj] = [];
+                records.forEach((record) => {
+                    recordObj[currentObj].push(record);
+                });
+
+                // Add each relationship to the stack for further exploration
+                // Child relationship: OtherObject -> CurrentObject
+                metadata.childRelationships.forEach((rel) => {
+                    if (permittedObjects.indexOf(rel.childSObject) !== -1) {
+                        stack.push({ currentObj: rel.childSObject, parentObj: currentObj });
+                    }
+                });
+
+                // Add each lookup field to the stack for further exploration
+                // Lookup: CurrentObject -> OtherObject
+                metadata.fields.forEach((field) => {
+                    if (field.referenceTo.length > 0) {
+                        field.referenceTo.forEach((ref) => {
+                            if (permittedObjects.indexOf(ref) !== -1) {
+                                stack.push({ currentObj: ref, parentObj: currentObj });
+                            }
+                        });
+                    }
+                });
+
+                // Start DFS
+                console.log("Resolving");
+                resolve();
+            }).on("error", (err) => {
+                console.log("Error querying for initial object records");
+                reject(err);
+            }).run({ autoFetch: true });
+        }).catch((err) => {
+            console.log("Error getting initial object metadata");
+            reject(err);
+        });
+    })
 }
 
 // Builds a full set of data with all relationships through an implementation of DFS
 function getRecordsDFS() {
+
     console.log('\n');
     console.log("getRecordsDFS : Stack :: " + JSON.stringify(stack));
     let nextItem = stack.pop();
     console.log(nextItem);
     console.log('\n');
-    
-    // Loop until stack is empty
-    if (nextItem) {
+
+    if (!nextItem) {
+        console.log("Done with dfs");
+        return Promise.resolve();
+    }
+
+    return new Promise((resolve, reject) => {
+        // Loop until stack is empty
         let currentObj = nextItem.currentObj;
         let parentObj = nextItem.parentObj;
 
@@ -110,18 +134,12 @@ function getRecordsDFS() {
             // Grab current object records through: Parent -> Current relationship
             getChildRelationshipRecords(currentObj, currentObjMetadata, parentObj).then(() => {
                 console.log("Got child relationships")
-                
+
                 // Grab current object records through: Current -> Parent relationship
                 getLookupRecords(currentObj, currentObjMetadata, parentObj).then(() => {
                     console.log("Got lookup records");
-                    
-                    fs.writeFile(
-                        "recordObject.json",
-                        JSON.stringify(recordObj),
-                        function (err) {
-                            if (err) console.log("Error writing file :: " + err);
-                        }
-                    );
+
+
 
                     // continueRecurse is set to true when new records are added to recordObject
                     // If no new records are added, no need to explore those relationships
@@ -151,20 +169,20 @@ function getRecordsDFS() {
                     }
                     // Reset continueRecurse to false, so other methods can change it if new records are added
                     continueRecurse = false;
-                    getRecordsDFS();
+                    resolve(getRecordsDFS());
                 }).catch((err) => {
                     console.log("Error getting lookup records");
-                    throw err;
+                    reject(err);
                 })
             }).catch((err) => {
                 console.log("Error getting child relationships");
-                throw err;
+                reject(err);
             });
         }).catch((err) => {
             console.log("Error getting object metadata");
-            throw err;
+            reject(err);
         });
-    }
+    });
 }
 
 // Adds all records to object based on Parent -> Current relationship
@@ -353,7 +371,7 @@ function fetchRecords(currentObj, metadata, relField, recIds) {
 
 // Determines if a record is already in recordObject. Returns true if it is, false if not
 function findObjectInList(arr, obj) {
-    for(let i = 0; i < arr.length; i++) {
+    for (let i = 0; i < arr.length; i++) {
         if (arr[i].Id === obj.Id) {
             return true;
         }
