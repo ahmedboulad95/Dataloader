@@ -37,7 +37,7 @@ conn.login(process.env.SF_DEV_USER, process.env.SF_DEV_PASS, function (err, user
             }
         );
 
-        
+
     }).catch((err) => {
         console.log(err);
     });
@@ -126,60 +126,57 @@ function getRecordsDFS() {
         // Loop until stack is empty
         let currentObj = nextItem.currentObj;
         let parentObj = nextItem.parentObj;
+        let currentObjMetadata = {};
 
         // Grab the metadata for the current object from SF
         getObjectMetadata(currentObj).then((metadata) => {
-            let currentObjMetadata = metadata;
+            currentObjMetadata = metadata;
 
             // Grab current object records through: Parent -> Current relationship
-            getChildRelationshipRecords(currentObj, currentObjMetadata, parentObj).then(() => {
-                console.log("Got child relationships")
+            return getChildRelationshipRecords(currentObj, currentObjMetadata, parentObj);
 
-                // Grab current object records through: Current -> Parent relationship
-                getLookupRecords(currentObj, currentObjMetadata, parentObj).then(() => {
-                    console.log("Got lookup records");
+        }).then(() => {
+            console.log("Got child relationships")
+
+            // Grab current object records through: Current -> Parent relationship
+            return getLookupRecords(currentObj, currentObjMetadata, parentObj);
+
+        }).then(() => {
+            console.log("Got lookup records");
 
 
 
-                    // continueRecurse is set to true when new records are added to recordObject
-                    // If no new records are added, no need to explore those relationships
-                    if (continueRecurse) {
-                        // Add all relationships (Parent -> Current) to the stack for further exploration
-                        currentObjMetadata.childRelationships.forEach((rel) => {
-                            if (permittedObjects.indexOf(rel.childSObject) !== -1) {
-                                let newItem = { currentObj: rel.childSObject, parentObj: currentObj };
+            // continueRecurse is set to true when new records are added to recordObject
+            // If no new records are added, no need to explore those relationships
+            if (continueRecurse) {
+                // Add all relationships (Parent -> Current) to the stack for further exploration
+                currentObjMetadata.childRelationships.forEach((rel) => {
+                    if (permittedObjects.indexOf(rel.childSObject) !== -1) {
+                        let newItem = { currentObj: rel.childSObject, parentObj: currentObj };
+                        if (stack.indexOf(newItem) === -1)
+                            stack.push(newItem);
+                    }
+                });
+
+                // Add all lookups (Current -> Parent) to the stack for further exploration
+                currentObjMetadata.fields.forEach((field) => {
+                    if (field.referenceTo.length > 0) {
+                        // Lookup could reference multiple objects, so need to add all of them
+                        field.referenceTo.forEach((ref) => {
+                            if (permittedObjects.indexOf(ref) !== -1) {
+                                let newItem = { currentObj: ref, parentObj: currentObj };
                                 if (stack.indexOf(newItem) === -1)
                                     stack.push(newItem);
                             }
                         });
-
-                        // Add all lookups (Current -> Parent) to the stack for further exploration
-                        currentObjMetadata.fields.forEach((field) => {
-                            if (field.referenceTo.length > 0) {
-                                // Lookup could reference multiple objects, so need to add all of them
-                                field.referenceTo.forEach((ref) => {
-                                    if (permittedObjects.indexOf(ref) !== -1) {
-                                        let newItem = { currentObj: ref, parentObj: currentObj };
-                                        if (stack.indexOf(newItem) === -1)
-                                            stack.push(newItem);
-                                    }
-                                });
-                            }
-                        });
                     }
-                    // Reset continueRecurse to false, so other methods can change it if new records are added
-                    continueRecurse = false;
-                    resolve(getRecordsDFS());
-                }).catch((err) => {
-                    console.log("Error getting lookup records");
-                    reject(err);
-                })
-            }).catch((err) => {
-                console.log("Error getting child relationships");
-                reject(err);
-            });
+                });
+            }
+            // Reset continueRecurse to false, so other methods can change it if new records are added
+            continueRecurse = false;
+            resolve(getRecordsDFS());
         }).catch((err) => {
-            console.log("Error getting object metadata");
+            console.log("Error getting child relationships");
             reject(err);
         });
     });
