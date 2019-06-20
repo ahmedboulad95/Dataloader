@@ -1,2 +1,7 @@
-node_modules
+node_modules/
+Data/
+metadataFiles/
+logs/
 .env
+test.js
+logCommentor.js
