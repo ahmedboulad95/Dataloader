@@ -2,7 +2,6 @@ node_modules/
 Data/
 metadataFiles/
 logs/
-.vscode/
 .env
 test.js
 logCommentor.js
