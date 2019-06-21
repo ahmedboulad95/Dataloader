@@ -16,12 +16,13 @@ let recordObj = {};
 let objMetadata = {};
 let stack = [];
 let continueRecurse = false;
+let initialobject;
 
 // Log in to Salesforce
-conn.login(process.env.SF_SOURCE_ORG_USER, process.env.SF_SOURCE_ORG_PASS, function (err, userInfo) {
+conn.login(process.env.PROD_USER, process.env.PROD_PASS, function (err, userInfo) {
     if (err) throw err;
 
-    let currentObj = process.argv[2];
+    let currentObj = initialobject = process.argv[2];
     let limit = process.argv[3];
 
     if (!currentObj || !limit)
@@ -32,6 +33,10 @@ conn.login(process.env.SF_SOURCE_ORG_USER, process.env.SF_SOURCE_ORG_PASS, funct
             console.log("Returned from startDFS");
             return getRecordsDFS();
         }).then(() => {
+            conn.logout((err) => {
+                if (err) console.log(err);
+            });
+
             utilities.createDir("./" + process.env.DATA_FOLDER_NAME);
             utilities.writeFile("./" + process.env.DATA_FOLDER_NAME + "/" + process.env.DATA_FILE_NAME, JSON.stringify(recordObj)).catch(err => console.log(err));
             utilities.writeFile("./" + process.env.DATA_FOLDER_NAME + "/" + process.env.METADATA_FILE_NAME, JSON.stringify(objMetadata)).catch(err => console.log(err));
@@ -148,7 +153,7 @@ function getRecordsDFS() {
                 currentObjMetadata.childRelationships.forEach((rel) => {
                     if (permittedObjects.indexOf(rel.childSObject) !== -1) {
                         let newItem = { currentObj: rel.childSObject, parentObj: currentObj };
-                        if (stack.indexOf(newItem) === -1)
+                        if (stack.indexOf(newItem) === -1 && rel.childSObject != parentObj && rel.childSObject !== initialobject)
                             stack.push(newItem);
                     }
                 });
@@ -160,13 +165,16 @@ function getRecordsDFS() {
                         field.referenceTo.forEach((ref) => {
                             if (permittedObjects.indexOf(ref) !== -1) {
                                 let newItem = { currentObj: ref, parentObj: currentObj };
-                                if (stack.indexOf(newItem) === -1)
+                                if (stack.indexOf(newItem) === -1 && ref != parentObj && ref !== initialobject)
                                     stack.push(newItem);
                             }
                         });
                     }
                 });
             }
+
+            console.log("API Limit: " + conn.limitInfo.apiUsage.limit);
+            console.log("API Used: " + conn.limitInfo.apiUsage.used);
             // Reset continueRecurse to false, so other methods can change it if new records are added
             continueRecurse = false;
             resolve(getRecordsDFS());
@@ -210,9 +218,10 @@ function getChildRelationshipRecords(currentObj, currentObjMetadata, parentObj) 
                 // To be used in the query
                 let parentRelIds = [];
                 recordObj[parentObj].forEach((parentRecord) => {
-                    parentRelIds.push(parentRecord[rel.field]);
+                    if (parentRelIds.indexOf(parentRecord[rel.field]) === -1)
+                        parentRelIds.push(parentRecord[rel.field]);
                 });
-
+                console.log("Building query for child relationships");
                 // Need to grab the records based on Id In parentObj[rel.field] since this is a Parent -> Current realtionship
                 fetchRecords(currentObj, currentObjMetadata, "Id", parentRelIds).then((records) => {
                     // Process the returned records if there are any
@@ -240,6 +249,7 @@ function getChildRelationshipRecords(currentObj, currentObjMetadata, parentObj) 
                     }
                     counter++;
                 }).catch((err) => {
+                    console.log("Failed in getChildRelationshipRecords -> fetchRecords");
                     reject(err);
                 });
             }
@@ -272,9 +282,10 @@ function getLookupRecords(currentObj, currentObjMetadata, parentObj) {
                 let field = childRels[i];
                 let parentRelIds = [];
                 recordObj[parentObj].forEach((parentRecord) => {
-                    parentRelIds.push(parentRecord["Id"]);
+                    if (parentRelIds.indexOf(parentRecord["Id"]) === -1)
+                        parentRelIds.push(parentRecord["Id"]);
                 });
-
+                console.log("Building query for lookups");
                 // Need to grab the records based on lookupName in parentIds
                 fetchRecords(currentObj, currentObjMetadata, field.name, parentRelIds).then((records) => {
                     if (records && records.length > 0) {
@@ -369,4 +380,14 @@ function findObjectInList(arr, obj) {
         }
     }
     return false;
+}
+
+function refreshConnection() {
+    return new Promise((resolve, reject) => {
+        conn = new jsforce.Connection(loginOptions);
+        conn.login(process.env.SF_DEV_USERNAME, process.env.SF_DEV_PASSWORD, (err, userInfo) => {
+            if (err) reject(err);
+            resolve(userInfo);
+        });
+    });
 }

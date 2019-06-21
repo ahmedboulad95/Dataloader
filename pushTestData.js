@@ -1,7 +1,6 @@
 "use strict";
 
 const jsforce = require("jsforce");
-const fs = require("fs");
 const utilities = require("./utilities.js");
 
 require('dotenv').config();
@@ -34,7 +33,6 @@ conn.login(process.env.SF_DEST_ORG_USER, process.env.SF_DEST_ORG_PASS, function 
                     if (counter === keys.length - 1) {
                         console.dir(idMap);
 
-
                         updateIds();
                         console.log(JSON.stringify(recordObj))
                         let newKeys = Object.keys(recordObj);
@@ -42,6 +40,10 @@ conn.login(process.env.SF_DEST_ORG_USER, process.env.SF_DEST_ORG_PASS, function 
                         for (let j = 0; j < newKeys.length; j++) {
                             updateRecords(recordObj[newKeys[j]], newKeys[j]).then(() => {
                                 if (counter === newKeys.length - 1) {
+                                    conn.logout((err) => {
+                                        if (err) console.log(err);
+                                    });
+
                                     console.log("Operation complete");
                                 }
                                 counter++;
