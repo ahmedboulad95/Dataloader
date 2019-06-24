@@ -19,7 +19,7 @@ let continueRecurse = false;
 let initialobject;
 
 // Log in to Salesforce
-conn.login(process.env.PROD_USER, process.env.PROD_PASS, function (err, userInfo) {
+conn.login(process.env.SF_SOURCE_ORG_USER, process.env.SF_SOURCE_ORG_PASS, function (err, userInfo) {
     if (err) throw err;
 
     let currentObj = initialobject = process.argv[2];
@@ -150,13 +150,13 @@ function getRecordsDFS() {
             // If no new records are added, no need to explore those relationships
             if (continueRecurse) {
                 // Add all relationships (Parent -> Current) to the stack for further exploration
-                currentObjMetadata.childRelationships.forEach((rel) => {
+                /*currentObjMetadata.childRelationships.forEach((rel) => {
                     if (permittedObjects.indexOf(rel.childSObject) !== -1) {
                         let newItem = { currentObj: rel.childSObject, parentObj: currentObj };
                         if (stack.indexOf(newItem) === -1 && rel.childSObject != parentObj && rel.childSObject !== initialobject)
                             stack.push(newItem);
                     }
-                });
+                });*/
 
                 // Add all lookups (Current -> Parent) to the stack for further exploration
                 currentObjMetadata.fields.forEach((field) => {
@@ -218,9 +218,13 @@ function getChildRelationshipRecords(currentObj, currentObjMetadata, parentObj) 
                 // To be used in the query
                 let parentRelIds = [];
                 recordObj[parentObj].forEach((parentRecord) => {
-                    if (parentRelIds.indexOf(parentRecord[rel.field]) === -1)
+                    if (parentRecord[rel.field] && parentRelIds.indexOf(parentRecord[rel.field]) === -1)
                         parentRelIds.push(parentRecord[rel.field]);
                 });
+
+                console.log("ParentRelIds Length :: " + parentRelIds.length);
+                console.log("ParentRelIds :: " + parentRelIds);
+
                 console.log("Building query for child relationships");
                 // Need to grab the records based on Id In parentObj[rel.field] since this is a Parent -> Current realtionship
                 fetchRecords(currentObj, currentObjMetadata, "Id", parentRelIds).then((records) => {
@@ -282,9 +286,13 @@ function getLookupRecords(currentObj, currentObjMetadata, parentObj) {
                 let field = childRels[i];
                 let parentRelIds = [];
                 recordObj[parentObj].forEach((parentRecord) => {
-                    if (parentRelIds.indexOf(parentRecord["Id"]) === -1)
+                    if (parentRecord["Id"] && parentRelIds.indexOf(parentRecord["Id"]) === -1)
                         parentRelIds.push(parentRecord["Id"]);
                 });
+
+                console.log("ParentRelIds Length :: " + parentRelIds.length);
+                console.log("ParentRelIds :: " + parentRelIds);
+
                 console.log("Building query for lookups");
                 // Need to grab the records based on lookupName in parentIds
                 fetchRecords(currentObj, currentObjMetadata, field.name, parentRelIds).then((records) => {
@@ -337,6 +345,9 @@ function getObjectMetadata(currentObj) {
 
 // Build and execute query for the passed in object
 function fetchRecords(currentObj, metadata, relField, recIds) {
+    if(recIds.length === 0)
+        return Promise.resolve([]);
+
     return new Promise((resolve, reject) => {
         let queryString = "SELECT ";
         let fields = [];
