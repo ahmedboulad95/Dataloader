@@ -392,13 +392,3 @@ function findObjectInList(arr, obj) {
     }
     return false;
 }
-
-function refreshConnection() {
-    return new Promise((resolve, reject) => {
-        conn = new jsforce.Connection(loginOptions);
-        conn.login(process.env.SF_DEV_USERNAME, process.env.SF_DEV_PASSWORD, (err, userInfo) => {
-            if (err) reject(err);
-            resolve(userInfo);
-        });
-    });
-}
