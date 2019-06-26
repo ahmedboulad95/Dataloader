@@ -12,7 +12,7 @@ let loginOptions = { loginUrl: process.env.SF_SOURCE_ORG_URL };
 let conn = new jsforce.Connection(loginOptions);
 let recordObject = {};
 
-conn.login(process.env.SF_SOURCE_ORG_USER, process.env.SF_SOURCE_ORG_PASS, (err, userInfo) => {
+conn.login(process.env.PROD_USER, process.env.PROD_PASS, (err, userInfo) => {
     if (err) console.log(err);
 
     console.log("Logged in");
@@ -114,7 +114,7 @@ function doQuery(currentNode, tree) {
         let queryString = null;
 
         if (currentNode === tree.root) {
-            queryString = buildQueryString(currentNode, 100);
+            queryString = buildQueryString(currentNode, 1);
         } else {
             queryString = buildQueryString(currentNode, null);
         }
@@ -127,6 +127,8 @@ function doQuery(currentNode, tree) {
             }).catch((err) => {
                 console.log(err);
             });
+        } else {
+            resolve(currentNode, tree);
         }
     });
 }
@@ -197,17 +199,18 @@ function buildQueryString(currentNode, limit) {
                 }
             });
 
+            if (conditionals.length > 0) {
+                queryString = "SELECT ";
+                let fields = [];
+                metadata.fields.forEach((field) => {
+                    if (field.updateable || field.name.includes("__c") || field.name === "Id")
+                        fields.push(field.name);
+                });
+                queryString += fields.join(",");
 
-            queryString = "SELECT ";
-            let fields = [];
-            metadata.fields.forEach((field) => {
-                if (field.updateable || field.name.includes("__c") || field.name === "Id")
-                    fields.push(field.name);
-            });
-            queryString += fields.join(",");
-
-            queryString += " FROM " + currentNode.objectName + " WHERE ";
-            queryString += conditionals.join(" OR ");
+                queryString += " FROM " + currentNode.objectName + " WHERE ";
+                queryString += conditionals.join(" OR ");
+            }
         }
     }
 
