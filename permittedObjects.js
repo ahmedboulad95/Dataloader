@@ -22,7 +22,8 @@ const permittedObjects = [
     "Transaction__c",
     "Work_Assignment__c",
     "Lender__c",
-    "Dealer__c"
+    "Dealer__c",
+    "Acct__c"
 ]
 
 /*const omitObjects = [
