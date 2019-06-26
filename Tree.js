@@ -45,6 +45,7 @@ class Tree {
         if(parent) {
             parent.children.push(child);
             child.parent = parent;
+            return child;
         } else {
             throw "Cannot add node to non-existant parent.";
         }

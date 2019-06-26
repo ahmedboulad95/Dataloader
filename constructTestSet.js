@@ -15,6 +15,7 @@ let recordObject = {};
 conn.login(process.env.SF_SOURCE_ORG_USER, process.env.SF_SOURCE_ORG_PASS, (err, userInfo) => {
     if (err) console.log(err);
 
+    console.log("Logged in");
     buildMetadataMap()
         .then(() => {
             let keys = Object.keys(objectMetadataMap);
@@ -30,10 +31,12 @@ conn.login(process.env.SF_SOURCE_ORG_USER, process.env.SF_SOURCE_ORG_PASS, (err,
             let tree = res;
             tree.print();
             console.log("Done printing tree");
-
-            return buildRecordObject(tree);
+            return buildRecordObject(tree.root, [], tree);
         }).then(() => {
-            util.writeFile("./Data/testData.json", JSON.stringify(recordObject)).catch(err => console.log(err));
+            console.log("Finished building record object");
+            util.createDir("./" + process.env.DATA_FOLDER_NAME);
+            util.writeFile("./" + process.env.DATA_FOLDER_NAME + "/" + process.env.DATA_FILE_NAME, JSON.stringify(recordObject)).catch(err => console.log(err));
+            util.writeFile("./" + process.env.DATA_FOLDER_NAME + "/" + process.env.METADATA_FILE_NAME, JSON.stringify(objectMetadataMap)).catch(err => console.log(err));
         }).catch((err) => {
             console.log(err);
         });
@@ -68,8 +71,14 @@ function buildDataTree(rootObject) {
                     if (metadata.fields[i].referenceTo.length > 0) {
                         for (let j = 0; j < metadata.fields[i].referenceTo.length; j++) {
                             let currObject = metadata.fields[i].referenceTo[j];
-                            if (permittedObjects.indexOf(currObject) !== -1 && !tree.contains(currObject)) {
-                                tree.add(currObject, currentNode.objectName);
+                            if (permittedObjects.indexOf(currObject) !== -1) {
+                                let node = tree.contains(currObject);
+                                if (node) {
+                                    node.addRelatedField(metadata.fields[i].name, "childRel");
+                                } else {
+                                    let newNode = tree.add(currObject, currentNode.objectName);
+                                    newNode.addRelatedField(metadata.fields[i].name, "childRel");
+                                }
                             }
                         }
                     }
@@ -79,8 +88,14 @@ function buildDataTree(rootObject) {
                 if (currentNode === tree.root) {
                     for (let i = 0; i < metadata.childRelationships.length; i++) {
                         let currObject = metadata.childRelationships[i];
-                        if (permittedObjects.indexOf(currObject.childSObject) !== -1 && !tree.contains(currObject.childSObject)) {
-                            tree.add(currObject.childSObject, currentNode.objectName);
+                        if (permittedObjects.indexOf(currObject.childSObject) !== -1) {
+                            let node = tree.contains(currObject.childSObject);
+                            if (node) {
+                                node.addRelatedField(metadata.childRelationships[i].field, "lookup");
+                            } else {
+                                let newNode = tree.add(currObject.childSObject, currentNode.objectName);
+                                newNode.addRelatedField(metadata.childRelationships[i].field, "lookup");
+                            }
                         }
                     }
                 }
@@ -93,45 +108,121 @@ function buildDataTree(rootObject) {
     });
 }
 
-function buildRecordObject(tree) {
+function doQuery(currentNode, tree) {
     return new Promise((resolve, reject) => {
-        tree.traverseBF((currentNode) => {
-            let queryString = null;
+        console.log("Doing query for :: " + currentNode.objectName);
+        let queryString = null;
 
-            if (currentNode === tree.root) {
-                queryString = buildQueryString(currentNode.objectName);
-            } else {
-                // Handle all nodes that are not root
-            }
+        if (currentNode === tree.root) {
+            queryString = buildQueryString(currentNode, 100);
+        } else {
+            queryString = buildQueryString(currentNode, null);
+        }
+        console.log(queryString);
 
-            if (queryString) {
-                query(queryString).then((records) => {
-                    recordObject[currentNode.objectName] = records;
-                }).catch((err) => {
-                    // Reject?
-                });
-            }
-        });
+        if (queryString) {
+            query(queryString).then((records) => {
+                recordObject[currentNode.objectName] = records;
+                resolve(currentNode, tree);
+            }).catch((err) => {
+                console.log(err);
+            });
+        }
     });
 }
 
-function buildQueryString(objectName) {
-    let metadata = objectMetadataMap[objectName];
+function buildRecordObject(currentNode, queue, tree) {
+    return doQuery(currentNode, tree).then(() => {
+        for (let i = 0, length = currentNode.children.length; i < length; i++) {
+            queue.push(currentNode.children[i]);
+        }
+        currentNode = queue.shift();
+
+        if (currentNode) {
+            return buildRecordObject(currentNode, queue, tree);
+        } else {
+            return;
+        }
+    });
+}
+
+function buildQueryString(currentNode, limit) {
+    let metadata = objectMetadataMap[currentNode.objectName];
 
     let queryString = null;
 
     if (metadata) {
-        queryString = "SELECT ";
-        let fields = [];
-        metadata.fields.forEach((field) => {
-            // To avoid grabbing readonly fields
-            if (field.updateable || field.name.includes("__c") || field.name === "Id")
-                fields.push(field.name);
-        });
-        queryString += fields.join(",");
+        if (limit) {
+            queryString = "SELECT ";
+            let fields = [];
+            metadata.fields.forEach((field) => {
+                // To avoid grabbing readonly fields
+                if (field.updateable || field.name.includes("__c") || field.name === "Id")
+                    fields.push(field.name);
+            });
+            queryString += fields.join(",");
 
-        queryString += " FROM " + currentObj + " LIMIT ";
-        queryString += limit;
+            queryString += " FROM " + currentNode.objectName + " LIMIT ";
+            queryString += limit;
+        } else {
+            let relField = null;
+            let parents = recordObject[currentNode.parent.objectName];
+            let conditionals = [];
+
+            currentNode.relatedFields.forEach((relatedField) => {
+                let recIds = [];
+                let conditional = "";
+
+                if (relatedField.relationshipType === 'lookup') {
+                    conditional += relatedField.fieldName + " IN (";
+
+                    for (let i = 0; i < parents.length; i++) {
+                        recIds.push("'" + parents[i].Id + "'");
+                    }
+
+
+                } else {
+                    conditional += "Id IN (";
+
+                    for (let i = 0; i < parents.length; i++) {
+                        if (parents[i][relatedField.fieldName]) {
+                            recIds.push("'" + parents[i][relatedField.fieldName] + "'");
+                        }
+                    }
+                }
+
+                if (recIds.length > 0) {
+                    conditional += recIds.join(",") + ")";
+                    conditionals.push(conditional);
+                }
+            });
+
+
+            queryString = "SELECT ";
+            let fields = [];
+            metadata.fields.forEach((field) => {
+                if (field.updateable || field.name.includes("__c") || field.name === "Id")
+                    fields.push(field.name);
+            });
+            queryString += fields.join(",");
+
+            queryString += " FROM " + currentNode.objectName + " WHERE "; //+ relField + " IN (";
+            /*let ids = [];
+            recIds.forEach((id) => {
+                if (id)
+                    ids.push("'" + id + "'");
+            });
+
+            if (ids.length === 0)
+                resolve();
+            queryString += ids.join(",");
+            */
+           
+            queryString += conditionals.join(" OR ");
+
+            
+            //queryString += ')';
+        }
     }
 
     return queryString;
