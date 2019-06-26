@@ -206,22 +206,8 @@ function buildQueryString(currentNode, limit) {
             });
             queryString += fields.join(",");
 
-            queryString += " FROM " + currentNode.objectName + " WHERE "; //+ relField + " IN (";
-            /*let ids = [];
-            recIds.forEach((id) => {
-                if (id)
-                    ids.push("'" + id + "'");
-            });
-
-            if (ids.length === 0)
-                resolve();
-            queryString += ids.join(",");
-            */
-           
+            queryString += " FROM " + currentNode.objectName + " WHERE ";
             queryString += conditionals.join(" OR ");
-
-            
-            //queryString += ')';
         }
     }
 
