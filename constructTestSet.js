@@ -132,12 +132,12 @@ function doQuery(currentNode, tree) {
         if (queryString) {
             query(queryString).then((records) => {
                 recordObject[currentNode.objectName] = records;
-                resolve(currentNode, tree);
+                resolve();
             }).catch((err) => {
                 console.log(err);
             });
         } else {
-            resolve(currentNode, tree);
+            resolve();
         }
     });
 }
