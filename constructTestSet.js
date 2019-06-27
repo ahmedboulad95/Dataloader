@@ -92,8 +92,6 @@ function buildDataTree(rootObject) {
                         }
                     }
 
-                    // May need to do this for other objects too like Terms
-                    //if (currentNode === tree.root) {
                     for (let i = 0; i < metadata.childRelationships.length; i++) {
                         let currObject = metadata.childRelationships[i];
                         if (permittedObjects.indexOf(currObject.childSObject) !== -1) {
@@ -106,7 +104,6 @@ function buildDataTree(rootObject) {
                             }
                         }
                     }
-                    //}
                 }
             });
             console.log("Continuing");
