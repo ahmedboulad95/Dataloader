@@ -1,4 +1,4 @@
-const permittedObjects = [
+module.exports.permittedObjects = permittedObjects = [
     "Account",
     "Batch__c",
     "Batch_Assignment__c",
@@ -7,8 +7,8 @@ const permittedObjects = [
     "Dealership_Assignment__c",
     "Discrepancy_LF__c",
     "Discrepancy__c",
-    //"Event",
-    //"FAQ__c",
+    "Event",
+    "FAQ__c",
     "Import_File__c",
     "Lead",
     "Loan__c",
@@ -16,7 +16,7 @@ const permittedObjects = [
     "Mailing__c",
     "Opportunity",
     "Payment__c",
-    //"Task",
+    "Task",
     "Term_Assignment__c",
     "Terms__c",
     "Transaction__c",
@@ -26,38 +26,10 @@ const permittedObjects = [
     "Acct__c"
 ]
 
-/*const omitObjects = [
-    "ActivityHistory",
-    "AttachedContentDocument",
-    "CollaborationGroupRecord",
-    "CombinedAttachment",
-    "ContentDistribution",
-    "ContentDocumentLink",
-    "ContentVersion",
-    "EmailMessage",
-    "EntitySubscription",
-    "EventChangeEvent",
-    "EventRelation",
-    "EventRelationChangeEvent",
-    "FeedComment",
-    "FeedItem",
-    "FlowRecordRelation",
-    "Loan__Feed",
-    "Loan__History",
-    "Loan__Share",
-    "NetworkActivityAudit",
-    "NetworkUserHistoryRecent",
-    "Note",
-    "NoteAndAttachment",
-    "OpenActivity",
-    "ProcessInstance",
-    "ProcessInstanceHistory",
-    "RecordAction",
-    "Solution",
-
-    "Group",
-    "User",
-    "RecordType"
-]*/
-
-module.exports = permittedObjects;
+module.exports.explorableObjects = explorableObjects = [
+    "Loan__c",
+    "Terms__c",
+    "Term_Assignment__c",
+    "Batch_Assignment__c",
+    "Transaction__c"
+]

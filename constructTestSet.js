@@ -2,7 +2,8 @@
 
 const jsforce = require("jsforce");
 const Tree = require("./Tree.js");
-const permittedObjects = require("./permittedObjects.js");
+const permittedObjects = require("./permittedObjects.js").permittedObjects;
+const explorableObjects = require("./permittedObjects.js").explorableObjects;
 const util = require("./utilities.js");
 
 require('dotenv').config();
@@ -30,6 +31,12 @@ conn.login(process.env.PROD_USER, process.env.PROD_PASS, (err, userInfo) => {
         }).then((res) => {
             let tree = res;
             tree.print();
+            util.writeFile("./Data/tree.json", JSON.stringify(tree, (key, value) => {
+                if(key === "parent") {
+                    return undefined;
+                }
+                return value;
+            })).then(err => console.log(err));
             console.log("Done printing tree");
             return buildRecordObject(tree.root, [], tree);
         }).then(() => {
@@ -67,25 +74,26 @@ function buildDataTree(rootObject) {
                 console.log("Current Node :: " + currentNode.objectName);
                 let metadata = objectMetadataMap[currentNode.objectName];
 
-                for (let i = 0; i < metadata.fields.length; i++) {
-                    if (metadata.fields[i].referenceTo.length > 0) {
-                        for (let j = 0; j < metadata.fields[i].referenceTo.length; j++) {
-                            let currObject = metadata.fields[i].referenceTo[j];
-                            if (permittedObjects.indexOf(currObject) !== -1) {
-                                let node = tree.contains(currObject);
-                                if (node) {
-                                    node.addRelatedField(metadata.fields[i].name, "childRel");
-                                } else {
-                                    let newNode = tree.add(currObject, currentNode.objectName);
-                                    newNode.addRelatedField(metadata.fields[i].name, "childRel");
+                if (explorableObjects.indexOf(currentNode.objectName) !== -1) {
+                    for (let i = 0; i < metadata.fields.length; i++) {
+                        if (metadata.fields[i].referenceTo.length > 0) {
+                            for (let j = 0; j < metadata.fields[i].referenceTo.length; j++) {
+                                let currObject = metadata.fields[i].referenceTo[j];
+                                if (permittedObjects.indexOf(currObject) !== -1) {
+                                    let node = tree.contains(currObject);
+                                    if (node) {
+                                        node.addRelatedField(metadata.fields[i].name, "childRel");
+                                    } else {
+                                        let newNode = tree.add(currObject, currentNode.objectName);
+                                        newNode.addRelatedField(metadata.fields[i].name, "childRel");
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                // May need to do this for other objects too like Terms
-                if (currentNode === tree.root) {
+                    // May need to do this for other objects too like Terms
+                    //if (currentNode === tree.root) {
                     for (let i = 0; i < metadata.childRelationships.length; i++) {
                         let currObject = metadata.childRelationships[i];
                         if (permittedObjects.indexOf(currObject.childSObject) !== -1) {
@@ -98,6 +106,7 @@ function buildDataTree(rootObject) {
                             }
                         }
                     }
+                    //}
                 }
             });
             console.log("Continuing");
@@ -164,7 +173,7 @@ function buildQueryString(currentNode, limit) {
             });
             queryString += fields.join(",");
 
-            queryString += " FROM " + currentNode.objectName + " LIMIT ";
+            queryString += " FROM " + currentNode.objectName + " WHERE Lender__c != null and Dealership__c != null LIMIT ";
             queryString += limit;
         } else {
             let relField = null;
