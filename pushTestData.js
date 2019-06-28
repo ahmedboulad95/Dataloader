@@ -21,9 +21,16 @@ conn.login(process.env.SF_DEST_ORG_USER, process.env.SF_DEST_ORG_PASS, function 
 
     utilities.readFile("./" + process.env.DATA_FOLDER_NAME + "/" + process.env.DATA_FILE_NAME)
         .then((data) => {
+            if (!data) {
+                throw "Data file not found or empty";
+            }
             recordObj = JSON.parse(data);
             return utilities.readFile("./" + process.env.DATA_FOLDER_NAME + "/" + process.env.METADATA_FILE_NAME);
         }).then((data) => {
+            if (!data) {
+                throw "Metadata file not found or empty";
+            }
+
             objMetadata = JSON.parse(data);
 
             let counter = 0;
