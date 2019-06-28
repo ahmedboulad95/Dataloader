@@ -5,8 +5,35 @@ const Tree = require("./Tree.js");
 const permittedObjects = require("./permittedObjects.js").permittedObjects;
 const explorableObjects = require("./permittedObjects.js").explorableObjects;
 const util = require("./utilities.js");
+const winston = require("winston");
 
 require('dotenv').config();
+
+let loggerOptions = {
+    file: {
+        level: "info",
+        filename: "./Logs/app.log",
+        handleExceptions: true,
+        json: true,
+        maxsize: 5242880,
+        maxFiles: 5,
+        colorize: false
+    },
+    console: {
+        level: "error",
+        handleExceptions: true,
+        json: false,
+        colorize: true
+    }
+}
+
+let logger = new winston.createLogger({
+    transports: [
+        new winston.transports.File(loggerOptions.file),
+        new winston.transports.Console(loggerOptions.console)
+    ],
+    exitOnError: false
+});
 
 let objectMetadataMap = {};
 let loginOptions = { loginUrl: process.env.SF_SOURCE_ORG_URL };
@@ -14,9 +41,9 @@ let conn = new jsforce.Connection(loginOptions);
 let recordObject = {};
 
 conn.login(process.env.PROD_USER, process.env.PROD_PASS, (err, userInfo) => {
-    if (err) console.log(err);
+    if (err) logger.log("error", err);
 
-    console.log("Logged in");
+    logger.log("info", "Logged into " + conn.instanceUrl + " as " + userInfo.id);
     buildMetadataMap()
         .then(() => {
             let keys = Object.keys(objectMetadataMap);
@@ -25,27 +52,33 @@ conn.login(process.env.PROD_USER, process.env.PROD_PASS, (err, userInfo) => {
                     delete objectMetadataMap[keys[i]];
                 }
             }
-            console.log("Finished building metadata map");
-            console.log("Keys :: " + Object.keys(objectMetadataMap));
+            logger.log("info", "Finished building metadata map :: " + JSON.stringify(objectMetadataMap));
+            logger.log("info", "Object metadata map keys :: " + Object.keys(objectMetadataMap));
             return buildDataTree("Loan__c");
         }).then((res) => {
             let tree = res;
             tree.print();
-            util.writeFile("./Data/tree.json", JSON.stringify(tree, (key, value) => {
-                if(key === "parent") {
+            logger.log("info", "Tree :: " + tree.print());
+            logger.log("info", JSON.stringify(tree, (key, value) => {
+                if (key === "parent") {
                     return undefined;
                 }
                 return value;
-            })).then(err => console.log(err));
-            console.log("Done printing tree");
+            }));
+            util.writeFile("./Data/tree.json", JSON.stringify(tree, (key, value) => {
+                if (key === "parent") {
+                    return undefined;
+                }
+                return value;
+            })).catch(err => logger.log("error", err));
             return buildRecordObject(tree.root, [], tree);
         }).then(() => {
-            console.log("Finished building record object");
+            logger.log("info", "Finished building record object :: " + recordObject);
             util.createDir("./" + process.env.DATA_FOLDER_NAME);
-            util.writeFile("./" + process.env.DATA_FOLDER_NAME + "/" + process.env.DATA_FILE_NAME, JSON.stringify(recordObject)).catch(err => console.log(err));
-            util.writeFile("./" + process.env.DATA_FOLDER_NAME + "/" + process.env.METADATA_FILE_NAME, JSON.stringify(objectMetadataMap)).catch(err => console.log(err));
+            util.writeFile("./" + process.env.DATA_FOLDER_NAME + "/" + process.env.DATA_FILE_NAME, JSON.stringify(recordObject)).catch(err => logger.log("error", err));
+            util.writeFile("./" + process.env.DATA_FOLDER_NAME + "/" + process.env.METADATA_FILE_NAME, JSON.stringify(objectMetadataMap)).catch(err => logger.log("error", err));
         }).catch((err) => {
-            console.log(err);
+            logger.log("error", err);
         });
 });
 
@@ -61,6 +94,7 @@ function buildMetadataMap() {
                     count++;
                 }).catch((err) => {
                     count++;
+                    logger.log("error", err);
                 });
         }
     });
@@ -71,7 +105,7 @@ function buildDataTree(rootObject) {
         try {
             let tree = new Tree(rootObject);
             tree.traverseBF((currentNode) => {
-                console.log("Current Node :: " + currentNode.objectName);
+                logger.log("info", "Current Node :: " + currentNode.objectName);
                 let metadata = objectMetadataMap[currentNode.objectName];
 
                 if (explorableObjects.indexOf(currentNode.objectName) !== -1) {
@@ -106,9 +140,9 @@ function buildDataTree(rootObject) {
                     }
                 }
             });
-            console.log("Continuing");
             resolve(tree);
         } catch (err) {
+            logger.log("error", err);
             reject(err);
         }
     });
@@ -116,7 +150,7 @@ function buildDataTree(rootObject) {
 
 function doQuery(currentNode, tree) {
     return new Promise((resolve, reject) => {
-        console.log("Doing query for :: " + currentNode.objectName);
+        logger.log("info", "Doing query for :: " + currentNode.objectName);
         let queryString = null;
 
         if (currentNode === tree.root) {
@@ -124,14 +158,14 @@ function doQuery(currentNode, tree) {
         } else {
             queryString = buildQueryString(currentNode, null);
         }
-        console.log(queryString);
+        logger.log("debug", queryString);
 
         if (queryString) {
             query(queryString).then((records) => {
                 recordObject[currentNode.objectName] = records;
                 resolve();
             }).catch((err) => {
-                console.log(err);
+                logger.log("error", err);
             });
         } else {
             resolve();
@@ -170,40 +204,42 @@ function buildQueryString(currentNode, limit) {
             });
             queryString += fields.join(",");
 
-            queryString += " FROM " + currentNode.objectName + " WHERE Lender__c != null and Dealership__c != null LIMIT ";
+            queryString += " FROM " + currentNode.objectName + " WHERE Id in ('a000Z00000ibcyVQAQ', 'a000Z00000ibcy5QAA') LIMIT ";
             queryString += limit;
         } else {
             let relField = null;
             let parents = recordObject[currentNode.parent.objectName];
             let conditionals = [];
 
-            currentNode.relatedFields.forEach((relatedField) => {
-                let recIds = [];
-                let conditional = "";
+            if (parents) {
+                currentNode.relatedFields.forEach((relatedField) => {
+                    let recIds = [];
+                    let conditional = "";
 
-                if (relatedField.relationshipType === 'lookup') {
-                    conditional += relatedField.fieldName + " IN (";
+                    if (relatedField.relationshipType === 'lookup') {
+                        conditional += relatedField.fieldName + " IN (";
 
-                    for (let i = 0; i < parents.length; i++) {
-                        recIds.push("'" + parents[i].Id + "'");
-                    }
+                        for (let i = 0; i < parents.length; i++) {
+                            recIds.push("'" + parents[i].Id + "'");
+                        }
 
 
-                } else {
-                    conditional += "Id IN (";
+                    } else {
+                        conditional += "Id IN (";
 
-                    for (let i = 0; i < parents.length; i++) {
-                        if (parents[i][relatedField.fieldName]) {
-                            recIds.push("'" + parents[i][relatedField.fieldName] + "'");
+                        for (let i = 0; i < parents.length; i++) {
+                            if (parents[i][relatedField.fieldName]) {
+                                recIds.push("'" + parents[i][relatedField.fieldName] + "'");
+                            }
                         }
                     }
-                }
 
-                if (recIds.length > 0) {
-                    conditional += recIds.join(",") + ")";
-                    conditionals.push(conditional);
-                }
-            });
+                    if (recIds.length > 0) {
+                        conditional += recIds.join(",") + ")";
+                        conditionals.push(conditional);
+                    }
+                });
+            }
 
             if (conditionals.length > 0) {
                 queryString = "SELECT ";

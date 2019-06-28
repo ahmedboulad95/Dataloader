@@ -1,7 +1,7 @@
 node_modules/
 Data/
 metadataFiles/
-logs/
+Logs/
 .vscode/
 .env
 test.js
