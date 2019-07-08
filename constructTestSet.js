@@ -2,8 +2,6 @@
 
 const jsforce = require("jsforce");
 const Tree = require("./Tree.js");
-const permittedObjects = require("./permittedObjects.js").permittedObjects;
-const explorableObjects = require("./permittedObjects.js").explorableObjects;
 const util = require("./utilities.js");
 const winston = require("winston");
 
@@ -40,12 +38,20 @@ let loginOptions = { loginUrl: process.env.SF_SOURCE_ORG_URL };
 let conn = new jsforce.Connection(loginOptions);
 let recordObject = {};
 
+let permittedObjects = null;
+let explorableObjects = null;
+
 conn.login(process.env.PROD_USER, process.env.PROD_PASS, (err, userInfo) => {
     if (err) logger.log("error", err);
 
     logger.log("info", "Logged into " + conn.instanceUrl + " as " + userInfo.id);
-    buildMetadataMap()
-        .then(() => {
+    util.readFile("./objectRes.json")
+        .then((data) => {
+            let d = JSON.parse(data);
+            permittedObjects = d["permittedObjects"];
+            explorableObjects = d["explorableObjects"];
+            return buildMetadataMap();
+        }).then(() => {
             let keys = Object.keys(objectMetadataMap);
             for (let i = 0; i < keys.length; i++) {
                 if (!objectMetadataMap[keys[i]]) {

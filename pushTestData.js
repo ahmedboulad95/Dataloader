@@ -7,7 +7,7 @@ require('dotenv').config();
 
 // Establish a connection to Salesforce
 var loginOptions = {
-    loginUrl: process.env.SF_DEST_ORG_URL
+    loginUrl: process.env.SF_DEV_LOGIN_URL
 };
 
 let conn = new jsforce.Connection(loginOptions);
@@ -16,7 +16,7 @@ let objMetadata = {};
 let idMap = {};
 
 // Log in to Salesforce
-conn.login(process.env.SF_DEST_ORG_USER, process.env.SF_DEST_ORG_PASS, function (err, userInfo) {
+conn.login(process.env.SF_DEV_USERNAME, process.env.SF_DEV_PASSWORD, function (err, userInfo) {
     if (err) throw err;
 
     utilities.readFile("./" + process.env.DATA_FOLDER_NAME + "/" + process.env.DATA_FILE_NAME)
@@ -152,3 +152,72 @@ function updateRecords(records, objectName) {
         });
     });
 }
+
+/*
+function syncRecordTypes() {
+    return new Promise((resolve, reject) => {
+        let keys = Object.keys(recordObj);
+        let recordTypeIds = [];
+        for (let i = 0; i < keys.length; i++) {
+            for (let j = 0; j < recordObj[keys[i]].length; j++) {
+                if (recordObj[keys[i]][j]["RecordTypeId"] && recordTypeIds.indexOf(recordObj[keys[i]][j]["RecordTypeId"]) === -1) {
+                    recordTypeIds.push("'" + recordObj[keys[i]][j]["RecordTypeId"] + "'");
+                }
+            }
+        }
+
+        if (recordTypeIds.length > 0) {
+            let queryString = "SELECT ID, Name FROM RecordType WHERE ID IN (" + recordTypeIds.join(",") + ")";
+
+            console.log(queryString);
+
+            let lOptions = {
+                loginUrl: process.env.SF_SOURCE_ORG_URL
+            }
+            let sourceOrgConn = new jsforce.Connection(lOptions);
+
+            sourceOrgConn.login(process.env.PROD_USER, process.env.PROD_PASS, (err, userInfo) => {
+                if (err) reject(err);
+
+                console.log(sourceOrgConn.instanceUrl);
+
+                let recordTypeIdMap = {};
+                utilities.query(sourceOrgConn, queryString).then((records) => {
+                    sourceOrgConn.logout((err) => console.log("Logged out of source org :: " + err));
+
+                    if (records.length === 0) {
+                        reject("No record types found in source org");
+                    }
+
+                    for (let i = 0; i < records.length; i++) {
+                        recordTypeIdMap[records[i].Name] = records[i].Id;
+                    }
+
+                    let queryString = "SELECT ID, Name FROM RecordType WHERE Name IN (" + Object.keys(recordTypeIdMap).map(x => "'" + x + "'").join(",") + ")";
+                    console.log(queryString);
+
+                    return utilities.query(conn, queryString);
+                }).then((recordTypes) => {
+                    let recTypeMap = {};
+                    for (let i = 0; i < recordTypes.length; i++) {
+                        recTypeMap[recordTypeIdMap[recordTypes[i].Name]] = recordTypes[i].Id;
+                    }
+
+                    let keys = Object.keys(recordObj);
+                    for (let i = 0; i < keys.length; i++) {
+                        for (let j = 0; j < recordObj[keys[i]].length; j++) {
+                            
+                        }
+                    }
+
+                    resolve(recTypeMap);
+                }).catch((err) => {
+                    reject(err);
+                });
+            });
+        } else {
+            resolve();
+        }
+    });
+}
+*/
