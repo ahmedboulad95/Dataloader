@@ -2,128 +2,123 @@
 
 const jsforce = require("jsforce");
 const utilities = require("./utilities.js");
+const logger = require("./logger.js");
+const order = require("./objectOrder.js").order;
 
 require('dotenv').config();
 
 // Establish a connection to Salesforce
-var loginOptions = {
-    loginUrl: process.env.SF_DEV_LOGIN_URL
-};
+let loginOptions = { loginUrl: process.env.DEV_SF_DEST_ORG_URL };
 
 let conn = new jsforce.Connection(loginOptions);
 let recordObj = {};
 let objMetadata = {};
 let idMap = {};
 
-// Log in to Salesforce
-conn.login(process.env.SF_DEV_USERNAME, process.env.SF_DEV_PASSWORD, function (err, userInfo) {
-    if (err) throw err;
+let user = process.env.DEV_SF_DEST_ORG_USER;
+let pass = process.env.DEV_SF_DEST_ORG_PASS;
+let token = process.env.DEV_SF_DEST_ORG_TOKEN;
 
+const logPath = "./logs/pushTestData.log";
+
+logger.log(logPath, logger.debug.INFO, `Logging into ${loginOptions.loginUrl} as ${user}`);
+conn.login(user, pass + token, function (err, userInfo) {
+    if (err) {
+        logger.log(logPath, logger.debug.ERROR, `Error logging in :: ${err}`);
+        console.log("Error establishing connection. See logs for details");
+        throw err;
+    } 
+
+    logger.log(logPath, logger.debug.INFO, `Logged into ${conn.instanceUrl} as ${userInfo.id}`);
     utilities.readFile("./" + process.env.DATA_FOLDER_NAME + "/" + process.env.DATA_FILE_NAME)
         .then((data) => {
             if (!data) {
+                logger.log(logPath, logger.debug.ERROR, `Error reading file: ./${process.env.DATA_FOLDER_NAME}/${process.env.DATA_FILE_NAME} does not exist or is corrupted`);
+                console.log(`Error reading file ${process.env.DATA_FILE_NAME}. See logs for details`);
+                logger.flush(logPath);
                 throw "Data file not found or empty";
             }
+
+            logger.log(logPath, logger.debug.INFO, `./${process.env.DATA_FOLDER_NAME}/${process.env.DATA_FILE_NAME} opened successfully`);
             recordObj = JSON.parse(data);
+            logger.log(logPath, logger.debug.INFO, `Reading object metadata information from ./${process.env.DATA_FOLDER_NAME}/${process.env.METADATA_FILE_NAME}`);
             return utilities.readFile("./" + process.env.DATA_FOLDER_NAME + "/" + process.env.METADATA_FILE_NAME);
         }).then((data) => {
             if (!data) {
+                logger.log(logPath, logger.debug.ERROR, `Error reading file: ./${process.env.DATA_FOLDER_NAME}/${process.env.METADATA_FILE_NAME} does not exist or is corrupted`);
+                console.log(`Error reading file ${process.env.METADATA_FILE_NAME}. See logs for details`);
+                logger.flush(logPath);
                 throw "Metadata file not found or empty";
             }
 
+            logger.log(logPath, logger.debug.INFO, `./${process.env.DATA_FOLDER_NAME}/${process.env.METADATA_FILE_NAME} opened successfully`);
             objMetadata = JSON.parse(data);
 
             let counter = 0;
             let keys = Object.keys(recordObj);
-            for (let i = 0; i < keys.length; i++) {
-                insertRecords(recordObj[keys[i]], keys[i]).then(() => {
-                    if (counter === keys.length - 1) {
+
+            logger.log(logPath, logger.debug.INFO, `Objects to insert :: ${keys}`);
+            console.log(order);
+            for(let i = 0; i < order.length; i++) {
+                let currObject = recordObj[order[i]];
+            //for (let i = 0; i < keys.length; i++) {
+                logger.log(logPath, logger.debug.INFO, `Inserting records asynchronously for ${keys[i]} :: ${currObject.length} records`);
+                insertRecords(currObject, order[i]).then(() => {
+                    logger.log(logPath, logger.debug.INFO, `Successfully inserted ${order[i]} records`);
+                    if (counter === order.length - 1) {
+                        logger.log(logPath, logger.debug.INFO, `ID Map :: ${idMap.toString()}`);
+                        console.log("ID Map:");
                         console.dir(idMap);
 
                         updateIds();
-                        console.log(JSON.stringify(recordObj))
+
                         let newKeys = Object.keys(recordObj);
                         counter = 0;
                         for (let j = 0; j < newKeys.length; j++) {
                             updateRecords(recordObj[newKeys[j]], newKeys[j]).then(() => {
                                 if (counter === newKeys.length - 1) {
+                                    logger.log(logPath, logger.debug.INFO, "Operation complete. Closing connection...");
                                     conn.logout((err) => {
-                                        if (err) console.log(err);
+                                        if (err) {
+                                            logger.log(logPath, logger.debug.ERROR, `Error logging out :: ${err}`);
+                                        } else {
+                                            logger.log(logPath, logger.debug.INFO, "Successfully closed the connection to Salesforce");
+                                            logger.flush(logPath);
+                                        }
                                     });
-
-                                    console.log("Operation complete");
                                 }
                                 counter++;
                             }).catch((err) => {
-                                console.log(err);
+                                console.log("Error updating records. See logs for details");
+                                logger.log(logPath, logger.debug.ERROR, `Error updating ${newKeys[i]} records :: ${err}`);
+                                logger.flush(logPath);
                             });
                         }
                     }
                     counter++;
                 }).catch((err) => {
-                    console.log(err);
+                    console.log("Error inserting records. See logs for details");
+                    logger.log(logPath, logger.debug.ERROR, `Error inserting ${keys[i]} records :: ${err}`);
+                    logger.flush(logPath);
                 });
             }
         }).catch((err) => {
-            console.log(err);
+            logger.log(logPath, logger.debug.ERROR, `Error in execution :: ${err}`);
+            console.log("Error in execution. See logs for details");
+            logger.flush(logPath);
         });
 });
-
-function insertBulk(records, objectName) {
-    return new Promise((resolve, reject) => {
-        let job = conn.bulk.createJob(objectName, "insert");
-        let batch = job.createBatch();
-
-        batch.execute(records);
-        batch.on("error", (batchInfo) => {
-            reject(batchInfo);
-        });
-        batch.on("queue", (batchInfo) => {
-            batch.poll(1000, 120000);
-        });
-        batch.on("response", (rets) => {
-            for (let i = 0; i < rets.length; i++) {
-                idMap[records[i].Id] = rets[i].id;
-                recordObj[objectName][i].Id = rets[i].id;
-            }
-            resolve();
-        });
-    });
-}
-
-function updateBulk(records, objectName) {
-    return new Promise((resolve, reject) => {
-        let job = conn.bulk.createJob(objectName, "update");
-        let batch = job.createBatch();
-
-        batch.execute(records);
-        batch.on("error", (batchInfo) => {
-            reject(batchInfo);
-        });
-        batch.on("queue", (batchInfo) => {
-            batch.poll(1000, 120000);
-        });
-        batch.on("response", (rets) => {
-            resolve();
-        });
-    });
-}
 
 function updateIds() {
     let keys = Object.keys(recordObj);
     for (let i = 0; i < keys.length; i++) {
         let currentObj = keys[i];
-        console.log(currentObj);
+        logger.log(logPath, logger.debug.INFO, `Updating Ids for ${currentObj}`);
         let metadata = objMetadata[currentObj];
-        console.log("After getting metadata");
         for (let j = 0; j < recordObj[currentObj].length; j++) {
-            console.log("Looping through records");
             for (let k = 0; k < metadata.fields.length; k++) {
-                console.log("Looping through fields");
-                console.log("Field :: " + metadata.fields[k].name);
-
                 if (metadata.fields[k].referenceTo.length > 0 && idMap[recordObj[currentObj][j][metadata.fields[k].name]]) {
-
+                    logger.log(logPath, logger.debug.INFO, `Updating reference field ${currentObj}.${metadata.fields[k].name}`);
                     recordObj[currentObj][j][metadata.fields[k].name] = idMap[recordObj[currentObj][j][metadata.fields[k].name]];
                 }
             }
@@ -133,8 +128,16 @@ function updateIds() {
 
 function insertRecords(records, objectName) {
     return new Promise((resolve, reject) => {
+        console.log(`Inserting ${objectName}`);
+        //console.log(records);
         conn.sobject(objectName).create(records, { allowRecursive: true }, (err, rets) => {
             if (err) reject(err);
+
+            console.log(rets.length);
+            console.log(objectName);
+            rets.forEach((element => {
+                console.dir(element);
+            }));
             for (let i = 0; i < rets.length; i++) {
                 idMap[records[i].Id] = rets[i].id;
                 recordObj[objectName][i].Id = rets[i].id;
@@ -146,6 +149,8 @@ function insertRecords(records, objectName) {
 
 function updateRecords(records, objectName) {
     return new Promise((resolve, reject) => {
+        console.log(`Updating ${objectName}`);
+        //console.log(records);
         conn.sobject(objectName).update(records, { allowRecursive: true }, (err, ret) => {
             if (err) reject(err);
             else resolve();
@@ -206,7 +211,7 @@ function syncRecordTypes() {
                     let keys = Object.keys(recordObj);
                     for (let i = 0; i < keys.length; i++) {
                         for (let j = 0; j < recordObj[keys[i]].length; j++) {
-                            
+
                         }
                     }
 

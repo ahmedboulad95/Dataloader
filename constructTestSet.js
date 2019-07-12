@@ -8,7 +8,7 @@ const logger = require("./logger.js");
 require('dotenv').config();
 
 let objectMetadataMap = {};
-let loginOptions = { loginUrl: process.env.SF_SOURCE_ORG_URL };
+let loginOptions = { loginUrl: process.env.DEV_SF_SOURCE_ORG_URL };
 let conn = new jsforce.Connection(loginOptions);
 let recordObject = {};
 
@@ -17,7 +17,7 @@ let explorableObjects = null;
 
 const logPath = "./logs/constructTestSet.log";
 
-conn.login(process.env.PROD_USER, process.env.PROD_PASS, (err, userInfo) => {
+conn.login(process.env.DEV_SF_SOURCE_ORG_USER, process.env.DEV_SF_SOURCE_ORG_PASS + process.env.DEV_SF_SOURCE_ORG_TOKEN, (err, userInfo) => {
     if (err) logger.log("error", err);
 
     logger.log(logPath, logger.debug.INFO, "Logged into " + conn.instanceUrl + " as " + userInfo.id);
@@ -41,7 +41,7 @@ conn.login(process.env.PROD_USER, process.env.PROD_PASS, (err, userInfo) => {
             let tree = res;
             tree.print();
             logger.log(logPath, logger.debug.INFO, "Tree :: " + tree.print());
-            logger.log(logPath, logger.debug.INFO,  JSON.stringify(tree, (key, value) => {
+            logger.log(logPath, logger.debug.INFO, JSON.stringify(tree, (key, value) => {
                 if (key === "parent") {
                     return undefined;
                 }
@@ -56,6 +56,15 @@ conn.login(process.env.PROD_USER, process.env.PROD_PASS, (err, userInfo) => {
             return buildRecordObject(tree.root, [], tree);
         }).then(() => {
             logger.log(logPath, logger.debug.INFO, "Finished building record object :: Size " + Object.keys(recordObject).length);
+
+            let keys = Object.keys(recordObject);
+            for (let i = 0; i < keys.length; i++) {
+                if (recordObject[keys[i]].length === 0) {
+                    console.log(`Deleting ${keys[i]}`);
+                    delete recordObject[keys[i]];
+                }
+            }
+
             util.createDir("./" + process.env.DATA_FOLDER_NAME);
             util.writeFile("./" + process.env.DATA_FOLDER_NAME + "/" + process.env.DATA_FILE_NAME, JSON.stringify(recordObject)).catch(err => logger.log("error", err));
             util.writeFile("./" + process.env.DATA_FOLDER_NAME + "/" + process.env.METADATA_FILE_NAME, JSON.stringify(objectMetadataMap)).catch(err => logger.log("error", err));
@@ -181,7 +190,7 @@ function buildQueryString(currentNode, limit) {
             let fields = [];
             metadata.fields.forEach((field) => {
                 // To avoid grabbing readonly fields
-                if (field.updateable || field.name.includes("__c") || field.name === "Id")
+                if (field.createable /*|| field.name.includes("__c")*/ || field.name === "Id")
                     fields.push(field.name);
             });
             queryString += fields.join(",");
@@ -227,7 +236,7 @@ function buildQueryString(currentNode, limit) {
                 queryString = "SELECT ";
                 let fields = [];
                 metadata.fields.forEach((field) => {
-                    if (field.updateable || field.name.includes("__c") || field.name === "Id")
+                    if (field.createable /*|| field.name.includes("__c")*/ || field.name === "Id")
                         fields.push(field.name);
                 });
                 queryString += fields.join(",");

@@ -14,14 +14,12 @@ const debug = {
 
 module.exports.debug = debug;
 
+let logString = "";
+
 exports.log = function (logPath, errorLevel, message) {
     let timeStamp = moment().format('YYYY-MM-DD HH:mm:ss');
     let callerFileName = path.basename(self._getCallerFile());
-    fs.appendFile(logPath, `${timeStamp} ${errorLevel} [${callerFileName}]: ${message}\n\r`, function (err) {
-        if (err) {
-            console.log(`ERROR WRITING TO LOG FILE - ${logPath} :: ${err}`)
-        }
-    });
+    logString += `${timeStamp} ${errorLevel} [${callerFileName}]: ${message}\n\r`;
 }
 
 exports._getCallerFile = function () {
@@ -48,4 +46,14 @@ exports._getCallerFile = function () {
     Error.prepareStackTrace = originalFunc;
 
     return callerfile;
+}
+
+exports.flush = function(logPath) {
+    let log = logString;
+    logString = "";
+    fs.appendFile(logPath, log, function (err) {
+        if (err) {
+            console.log(`ERROR WRITING TO LOG FILE - ${logPath} :: ${err}`)
+        }
+    });
 }
