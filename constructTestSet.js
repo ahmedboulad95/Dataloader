@@ -3,35 +3,9 @@
 const jsforce = require("jsforce");
 const Tree = require("./Tree.js");
 const util = require("./utilities.js");
-const winston = require("winston");
+const logger = require("./logger.js");
 
 require('dotenv').config();
-
-let loggerOptions = {
-    file: {
-        level: "info",
-        filename: "./Logs/app.log",
-        handleExceptions: true,
-        json: true,
-        maxsize: 5242880,
-        maxFiles: 5,
-        colorize: false
-    },
-    console: {
-        level: "error",
-        handleExceptions: true,
-        json: false,
-        colorize: true
-    }
-}
-
-let logger = new winston.createLogger({
-    transports: [
-        new winston.transports.File(loggerOptions.file),
-        new winston.transports.Console(loggerOptions.console)
-    ],
-    exitOnError: false
-});
 
 let objectMetadataMap = {};
 let loginOptions = { loginUrl: process.env.SF_SOURCE_ORG_URL };
@@ -41,10 +15,12 @@ let recordObject = {};
 let permittedObjects = null;
 let explorableObjects = null;
 
+const logPath = "./logs/constructTestSet.log";
+
 conn.login(process.env.PROD_USER, process.env.PROD_PASS, (err, userInfo) => {
     if (err) logger.log("error", err);
 
-    logger.log("info", "Logged into " + conn.instanceUrl + " as " + userInfo.id);
+    logger.log(logPath, logger.debug.INFO, "Logged into " + conn.instanceUrl + " as " + userInfo.id);
     util.readFile("./objectRes.json")
         .then((data) => {
             let d = JSON.parse(data);
@@ -58,14 +34,14 @@ conn.login(process.env.PROD_USER, process.env.PROD_PASS, (err, userInfo) => {
                     delete objectMetadataMap[keys[i]];
                 }
             }
-            logger.log("info", "Finished building metadata map :: " + JSON.stringify(objectMetadataMap));
-            logger.log("info", "Object metadata map keys :: " + Object.keys(objectMetadataMap));
+            logger.log(logPath, logger.debug.INFO, "Finished building metadata map");
+            logger.log(logPath, logger.debug.INFO, "Object metadata map keys :: " + Object.keys(objectMetadataMap));
             return buildDataTree("Loan__c");
         }).then((res) => {
             let tree = res;
             tree.print();
-            logger.log("info", "Tree :: " + tree.print());
-            logger.log("info", JSON.stringify(tree, (key, value) => {
+            logger.log(logPath, logger.debug.INFO, "Tree :: " + tree.print());
+            logger.log(logPath, logger.debug.INFO,  JSON.stringify(tree, (key, value) => {
                 if (key === "parent") {
                     return undefined;
                 }
@@ -79,12 +55,12 @@ conn.login(process.env.PROD_USER, process.env.PROD_PASS, (err, userInfo) => {
             })).catch(err => logger.log("error", err));
             return buildRecordObject(tree.root, [], tree);
         }).then(() => {
-            logger.log("info", "Finished building record object :: " + recordObject);
+            logger.log(logPath, logger.debug.INFO, "Finished building record object :: Size " + Object.keys(recordObject).length);
             util.createDir("./" + process.env.DATA_FOLDER_NAME);
             util.writeFile("./" + process.env.DATA_FOLDER_NAME + "/" + process.env.DATA_FILE_NAME, JSON.stringify(recordObject)).catch(err => logger.log("error", err));
             util.writeFile("./" + process.env.DATA_FOLDER_NAME + "/" + process.env.METADATA_FILE_NAME, JSON.stringify(objectMetadataMap)).catch(err => logger.log("error", err));
         }).catch((err) => {
-            logger.log("error", err);
+            logger.log(logPath, logger.debug.ERROR, err);
         });
 });
 
@@ -100,7 +76,7 @@ function buildMetadataMap() {
                     count++;
                 }).catch((err) => {
                     count++;
-                    logger.log("error", err);
+                    logger.log(logPath, logger.debug.ERROR, err);
                 });
         }
     });
@@ -111,7 +87,7 @@ function buildDataTree(rootObject) {
         try {
             let tree = new Tree(rootObject);
             tree.traverseBF((currentNode) => {
-                logger.log("info", "Current Node :: " + currentNode.objectName);
+                logger.log(logPath, logger.debug.INFO, "Current Node :: " + currentNode.objectName);
                 let metadata = objectMetadataMap[currentNode.objectName];
 
                 if (explorableObjects.indexOf(currentNode.objectName) !== -1) {
@@ -164,7 +140,7 @@ function doQuery(currentNode, tree) {
         } else {
             queryString = buildQueryString(currentNode, null);
         }
-        logger.log("debug", queryString);
+        logger.log(logPath, logger.debug.DEBUG, queryString);
 
         if (queryString) {
             query(queryString).then((records) => {
