@@ -16,6 +16,11 @@ module.exports.debug = debug;
 
 let logString = "";
 
+/**
+ * @param {String} logPath - path of log file
+ * @param {this.debug} errorLevel - level of log
+ * @param {String} message - message to log
+ */
 exports.log = function (logPath, errorLevel, message) {
     let timeStamp = moment().format('YYYY-MM-DD HH:mm:ss');
     let callerFileName = path.basename(self._getCallerFile());
@@ -48,6 +53,9 @@ exports._getCallerFile = function () {
     return callerfile;
 }
 
+/**
+ * @param {String} logPath - path of log file
+ */
 exports.flush = function(logPath) {
     let log = logString;
     logString = "";
