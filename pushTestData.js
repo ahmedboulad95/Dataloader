@@ -3,7 +3,7 @@
 const jsforce = require("jsforce");
 const utilities = require("./utilities.js");
 const logger = require("./logger.js");
-const order = require("./objectOrder.js").order;
+const orgKiller = require("./depopulate.js");
 
 require('dotenv').config();
 
@@ -14,6 +14,8 @@ let conn = new jsforce.Connection(loginOptions);
 let recordObj = {};
 let objMetadata = {};
 let idMap = {};
+
+let order = require("./objectOrder.js").order.slice();
 
 let user = process.env.DEV_SF_DEST_ORG_USER;
 let pass = process.env.DEV_SF_DEST_ORG_PASS;
@@ -30,8 +32,13 @@ conn.login(user, pass + token, function (err, userInfo) {
     }
 
     logger.log(logPath, logger.debug.INFO, `Logged into ${conn.instanceUrl} as ${userInfo.id}`);
-    utilities.readFile("./" + process.env.DATA_FOLDER_NAME + "/" + process.env.DATA_FILE_NAME)
-        .then((data) => {
+
+    orgKiller.destroy(conn, userInfo.id)
+        .then((status) => {
+            if (status === 1) throw "ABORT";
+
+            return utilities.readFile("./" + process.env.DATA_FOLDER_NAME + "/" + process.env.DATA_FILE_NAME);
+        }).then((data) => {
             if (!data) {
                 logger.log(logPath, logger.debug.ERROR, `Error reading file: ./${process.env.DATA_FOLDER_NAME}/${process.env.DATA_FILE_NAME} does not exist or is corrupted`);
                 console.log(`Error reading file ${process.env.DATA_FILE_NAME}. See logs for details`);
@@ -62,63 +69,25 @@ conn.login(user, pass + token, function (err, userInfo) {
 
             uploadDataSet(order.shift(), order).then(() => {
                 console.log("Upload complete");
-                /*conn.logout((err) => {
+                conn.logout((err) => {
                     if (err) {
                         logger.log(logPath, logger.debug.ERROR, `Error logging out :: ${err}`);
                     } else {
                         logger.log(logPath, logger.debug.INFO, "Successfully closed the connection to Salesforce");
                         logger.flush(logPath);
                     }
-                });*/
-            });
 
-            /*for (let i = 0; i < order.length; i++) {
-                let currObject = recordObj[order[i]];
-                //for (let i = 0; i < keys.length; i++) {
-                logger.log(logPath, logger.debug.INFO, `Inserting records asynchronously for ${keys[i]} :: ${currObject.length} records`);
-                insertRecords(currObject, order[i]).then(() => {
-                    logger.log(logPath, logger.debug.INFO, `Successfully inserted ${order[i]} records`);
-                    if (counter === order.length - 1) {
-                        logger.log(logPath, logger.debug.INFO, `ID Map :: ${idMap.toString()}`);
-                        console.log("ID Map:");
-                        console.dir(idMap);
-
-                        updateIds();
-
-                        let newKeys = Object.keys(recordObj);
-                        counter = 0;
-                        for (let j = 0; j < newKeys.length; j++) {
-                            updateRecords(recordObj[newKeys[j]], newKeys[j]).then(() => {
-                                if (counter === newKeys.length - 1) {
-                                    logger.log(logPath, logger.debug.INFO, "Operation complete. Closing connection...");
-                                    conn.logout((err) => {
-                                        if (err) {
-                                            logger.log(logPath, logger.debug.ERROR, `Error logging out :: ${err}`);
-                                        } else {
-                                            logger.log(logPath, logger.debug.INFO, "Successfully closed the connection to Salesforce");
-                                            logger.flush(logPath);
-                                        }
-                                    });
-                                }
-                                counter++;
-                            }).catch((err) => {
-                                console.log("Error updating records. See logs for details");
-                                logger.log(logPath, logger.debug.ERROR, `Error updating ${newKeys[i]} records :: ${err}`);
-                                logger.flush(logPath);
-                            });
-                        }
-                    }
-                    counter++;
-                }).catch((err) => {
-                    console.log("Error inserting records. See logs for details");
-                    logger.log(logPath, logger.debug.ERROR, `Error inserting ${keys[i]} records :: ${err}`);
-                    logger.flush(logPath);
+                    process.exit();
                 });
-            }*/
+            });
         }).catch((err) => {
-            logger.log(logPath, logger.debug.ERROR, `Error in execution :: ${err}`);
-            console.log("Error in execution. See logs for details");
-            logger.flush(logPath);
+            if (err === "ABORT") {
+                console.log("Operation aborted");
+            } else {
+                logger.log(logPath, logger.debug.ERROR, `Error in execution :: ${err}`);
+                console.log("Error in execution. See logs for details");
+                logger.flush(logPath);
+            }
         });
 });
 
@@ -141,46 +110,21 @@ function updateIds() {
 
 function uploadDataSet(current, queue) {
     return insertRecords(recordObj[current], current).then(() => {
-        if (recordObj[current]) {
-            updateIds();
-
-            let newKeys = Object.keys(recordObj);
-            let counter = 0;
-            for (let j = 0; j < newKeys.length; j++) {
-                updateRecords(recordObj[newKeys[j]], newKeys[j]).then(() => {
-                    if (counter === newKeys.length - 1) {
-                        /*logger.log(logPath, logger.debug.INFO, "Operation complete. Closing connection...");
-                        conn.logout((err) => {
-                            if (err) {
-                                logger.log(logPath, logger.debug.ERROR, `Error logging out :: ${err}`);
-                            } else {
-                                logger.log(logPath, logger.debug.INFO, "Successfully closed the connection to Salesforce");
-                                logger.flush(logPath);
-                            }
-                        });*/
-
-                        let current = queue.shift();
-                        if (current) {
-                            return uploadDataSet(current, queue);
-                        } else {
-                            return;
-                        }
-                    }
-                    counter++;
-                }).catch((err) => {
-                    console.log(`Error updating :: ${err}`);
-                    //console.log("Error updating records. See logs for details");
-                    //logger.log(logPath, logger.debug.ERROR, `Error updating ${newKeys[i]} records :: ${err}`);
-                    //logger.flush(logPath);
-                    let current = queue.shift();
-                    if (current) {
-                        return uploadDataSet(current, queue);
-                    } else {
-                        return;
-                    }
-                });
+        //if (recordObj[current]) {
+            let current = queue.shift();
+            if (current) {
+                return uploadDataSet(current, queue);
+            } else {
+                return;
             }
-        }
+        /*} else {
+            let current = queue.shift();
+            if (current) {
+                return uploadDataSet(current, queue);
+            } else {
+                return;
+            }
+        }*/
     }).catch((err) => {
         console.log(`Error inserting :: ${err}`)
         let current = queue.shift();
@@ -194,6 +138,7 @@ function uploadDataSet(current, queue) {
 
 function insertRecords(records, objectName) {
     return new Promise((resolve, reject) => {
+        console.log(`Inserting ${objectName}`);
         if (!objectName) {
             reject("Object name is required");
         }
@@ -217,8 +162,48 @@ function insertRecords(records, objectName) {
                 idMap[records[i].Id] = rets[i].id;
                 recordObj[objectName][i].Id = rets[i].id;
             }
-            resolve();
+
+            handleUpdate().then(() => {
+                /*let current = queue.shift();
+                if (current) {
+                    return uploadDataSet(current, queue);
+                } else {
+                    return;
+                }*/
+                resolve();
+            }).catch((err) => {
+                reject(err);
+                /*console.log(err);
+                let current = queue.shift();
+                if (current) {
+                    return uploadDataSet(current, queue);
+                } else {
+                    return;
+                }*/
+            });
+
+            
         });
+    });
+}
+
+function handleUpdate() {
+    return new Promise((resolve, reject) => {
+        updateIds();
+
+        let newKeys = Object.keys(recordObj);
+        let counter = 0;
+        for (let j = 0; j < newKeys.length; j++) {
+            updateRecords(recordObj[newKeys[j]], newKeys[j]).then(() => {
+                if (counter === newKeys.length - 1) {
+                    resolve();
+                }
+                counter++;
+            }).catch((err) => {
+                console.log(`Error updating :: ${err}`);
+                reject(err);
+            });
+        }
     });
 }
 

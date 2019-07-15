@@ -1,22 +1,13 @@
 "use strict";
 
-const jsforce = require("jsforce");
-const utilities = require("./utilities.js");
-const order = require("./objectOrder.js").order;
+const logger = require("./logger.js");
 
 const readline = require("readline").createInterface({
     input: process.stdin,
     output: process.stdout
 });
 
-require('dotenv').config();
-
-let loginOptions = { loginUrl: process.env.DEV_SF_DEST_ORG_URL };
-let conn = new jsforce.Connection(loginOptions);
-
-let user = process.env.DEV_SF_DEST_ORG_USER;
-let pass = process.env.DEV_SF_DEST_ORG_PASS;
-let token = process.env.DEV_SF_DEST_ORG_TOKEN;
+let logPath = "./logs/depopulate.js";
 
 module.exports.destroy = function (conn, user) {
     return new Promise((resolve, reject) => {
@@ -24,7 +15,8 @@ module.exports.destroy = function (conn, user) {
             if (decision.toLowerCase() === "y" || decision.toLowerCase() === "yes") {
                 console.log("Destroying database...");
 
-                executeOrder66(order.shift(), order, conn).then(() => {
+                let order = require("./objectOrder.js").order.slice();
+                executeOrder66(order.pop(), order, conn).then(() => {
                     resolve(0);
                 }).catch((err) => {
                     reject(err);
@@ -38,32 +30,33 @@ module.exports.destroy = function (conn, user) {
 }
 
 function executeOrder66(current, queue, conn) {
-    return query(conn, `SELECT Id FROM ${current}`).then((records) => {
-        let ids = [];
-        for (let i = 0; i < records.length; i++) {
-            ids.push(records[i].Id);
+    return query(conn, `SELECT Id FROM ${current}`, current).then((res) => {
+        console.log(`Deleted ${res.successes} records from ${current}. ${res.failures} errors`);
+        let next = queue.pop();
+        if (next) {
+            return executeOrder66(next, queue, conn);
+        } else {
+            return;
         }
-        console.log(current + " " + ids);
-
-        deleteRecords(conn, current, ids).then((res) => {
-            console.log(`Deleted ${res.successes} records from ${current}. ${res.failures} errors`);
-            let next = queue.shift();
-            if(next) {
-                return executeOrder66(next, queue, conn);
-            } else {
-                return;
-            }
-        });
     });
 }
 
-function query(conn, queryString) {
+function query(conn, queryString, current) {
     return new Promise((resolve, reject) => {
         let records = [];
         conn.query(queryString).on("record", (record) => {
             records.push(record);
         }).on("end", () => {
-            resolve(records);
+            let ids = [];
+            for (let i = 0; i < records.length; i++) {
+                ids.push(records[i].Id);
+            }
+
+            deleteRecords(conn, current, ids).then((res) => {
+                resolve(res);
+            }).catch((err) => {
+                reject(err);
+            });
         }).on("error", (err) => {
             reject(err);
         }).run({ autoFetch: true });
@@ -76,7 +69,7 @@ function deleteRecords(conn, object, ids) {
             if (err) {
                 console.log(`Error deleting records :: ${err}`);
                 reject(err);
-            } 
+            }
 
             let successes = 0;
             let failures = 0;
@@ -106,15 +99,3 @@ function deleteRecords(conn, object, ids) {
         });
     });
 }
-
-conn.login(user, pass + token, function (err, userInfo) {
-    if (err) throw err;
-
-    exports.destroy(conn, userInfo.name).then((res) => {
-        if(res === 0) {
-            console.log("Finished deleting");
-        } else {
-            console.log("Delete aborted");
-        }
-    });
-});
