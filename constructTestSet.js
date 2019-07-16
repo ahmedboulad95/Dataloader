@@ -1,44 +1,75 @@
 "use strict";
 
 const jsforce = require("jsforce");
-const Tree = require("./Tree.js");
-const permittedObjects = require("./permittedObjects.js");
-const util = require("./utilities.js");
+const Tree = require("./includes/Tree.js/index.js");
+const util = require("./includes/utilities.js");
+const logger = require("./includes/logger.js");
 
 require('dotenv').config();
 
 let objectMetadataMap = {};
-let loginOptions = { loginUrl: process.env.SF_SOURCE_ORG_URL };
+let loginOptions = { loginUrl: process.env.DEV_SF_SOURCE_ORG_URL };
 let conn = new jsforce.Connection(loginOptions);
 let recordObject = {};
 
-conn.login(process.env.SF_SOURCE_ORG_USER, process.env.SF_SOURCE_ORG_PASS, (err, userInfo) => {
-    if (err) console.log(err);
+let permittedObjects = null;
+let explorableObjects = null;
 
-    console.log("Logged in");
-    buildMetadataMap()
-        .then(() => {
+const logPath = "./logs/constructTestSet.log";
+
+conn.login(process.env.DEV_SF_SOURCE_ORG_USER, process.env.DEV_SF_SOURCE_ORG_PASS + process.env.DEV_SF_SOURCE_ORG_TOKEN, (err, userInfo) => {
+    if (err) logger.log("error", err);
+
+    logger.log(logPath, logger.debug.INFO, "Logged into " + conn.instanceUrl + " as " + userInfo.id);
+    util.readFile("./objectRes.json")
+        .then((data) => {
+            let d = JSON.parse(data);
+            permittedObjects = d["permittedObjects"];
+            explorableObjects = d["explorableObjects"];
+            return buildMetadataMap();
+        }).then(() => {
             let keys = Object.keys(objectMetadataMap);
             for (let i = 0; i < keys.length; i++) {
                 if (!objectMetadataMap[keys[i]]) {
                     delete objectMetadataMap[keys[i]];
                 }
             }
-            console.log("Finished building metadata map");
-            console.log("Keys :: " + Object.keys(objectMetadataMap));
+            logger.log(logPath, logger.debug.INFO, "Finished building metadata map");
+            logger.log(logPath, logger.debug.INFO, "Object metadata map keys :: " + Object.keys(objectMetadataMap));
             return buildDataTree("Loan__c");
         }).then((res) => {
             let tree = res;
             tree.print();
-            console.log("Done printing tree");
+            logger.log(logPath, logger.debug.INFO, "Tree :: " + tree.print());
+            logger.log(logPath, logger.debug.INFO, JSON.stringify(tree, (key, value) => {
+                if (key === "parent") {
+                    return undefined;
+                }
+                return value;
+            }));
+            util.writeFile("./Data/tree.json", JSON.stringify(tree, (key, value) => {
+                if (key === "parent") {
+                    return undefined;
+                }
+                return value;
+            })).catch(err => logger.log("error", err));
             return buildRecordObject(tree.root, [], tree);
         }).then(() => {
-            console.log("Finished building record object");
+            logger.log(logPath, logger.debug.INFO, "Finished building record object :: Size " + Object.keys(recordObject).length);
+
+            let keys = Object.keys(recordObject);
+            for (let i = 0; i < keys.length; i++) {
+                if (recordObject[keys[i]].length === 0) {
+                    console.log(`Deleting ${keys[i]}`);
+                    delete recordObject[keys[i]];
+                }
+            }
+
             util.createDir("./" + process.env.DATA_FOLDER_NAME);
-            util.writeFile("./" + process.env.DATA_FOLDER_NAME + "/" + process.env.DATA_FILE_NAME, JSON.stringify(recordObject)).catch(err => console.log(err));
-            util.writeFile("./" + process.env.DATA_FOLDER_NAME + "/" + process.env.METADATA_FILE_NAME, JSON.stringify(objectMetadataMap)).catch(err => console.log(err));
+            util.writeFile("./" + process.env.DATA_FOLDER_NAME + "/" + process.env.DATA_FILE_NAME, JSON.stringify(recordObject)).catch(err => logger.log("error", err));
+            util.writeFile("./" + process.env.DATA_FOLDER_NAME + "/" + process.env.METADATA_FILE_NAME, JSON.stringify(objectMetadataMap)).catch(err => logger.log("error", err));
         }).catch((err) => {
-            console.log(err);
+            logger.log(logPath, logger.debug.ERROR, err);
         });
 });
 
@@ -54,6 +85,7 @@ function buildMetadataMap() {
                     count++;
                 }).catch((err) => {
                     count++;
+                    logger.log(logPath, logger.debug.ERROR, err);
                 });
         }
     });
@@ -64,28 +96,27 @@ function buildDataTree(rootObject) {
         try {
             let tree = new Tree(rootObject);
             tree.traverseBF((currentNode) => {
-                console.log("Current Node :: " + currentNode.objectName);
+                logger.log(logPath, logger.debug.INFO, "Current Node :: " + currentNode.objectName);
                 let metadata = objectMetadataMap[currentNode.objectName];
 
-                for (let i = 0; i < metadata.fields.length; i++) {
-                    if (metadata.fields[i].referenceTo.length > 0) {
-                        for (let j = 0; j < metadata.fields[i].referenceTo.length; j++) {
-                            let currObject = metadata.fields[i].referenceTo[j];
-                            if (permittedObjects.indexOf(currObject) !== -1) {
-                                let node = tree.contains(currObject);
-                                if (node) {
-                                    node.addRelatedField(metadata.fields[i].name, "childRel");
-                                } else {
-                                    let newNode = tree.add(currObject, currentNode.objectName);
-                                    newNode.addRelatedField(metadata.fields[i].name, "childRel");
+                if (explorableObjects.indexOf(currentNode.objectName) !== -1) {
+                    for (let i = 0; i < metadata.fields.length; i++) {
+                        if (metadata.fields[i].referenceTo.length > 0) {
+                            for (let j = 0; j < metadata.fields[i].referenceTo.length; j++) {
+                                let currObject = metadata.fields[i].referenceTo[j];
+                                if (permittedObjects.indexOf(currObject) !== -1) {
+                                    let node = tree.contains(currObject);
+                                    if (node) {
+                                        node.addRelatedField(metadata.fields[i].name, "childRel");
+                                    } else {
+                                        let newNode = tree.add(currObject, currentNode.objectName);
+                                        newNode.addRelatedField(metadata.fields[i].name, "childRel");
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                // May need to do this for other objects too like Terms
-                if (currentNode === tree.root) {
                     for (let i = 0; i < metadata.childRelationships.length; i++) {
                         let currObject = metadata.childRelationships[i];
                         if (permittedObjects.indexOf(currObject.childSObject) !== -1) {
@@ -100,9 +131,9 @@ function buildDataTree(rootObject) {
                     }
                 }
             });
-            console.log("Continuing");
             resolve(tree);
         } catch (err) {
+            logger.log("error", err);
             reject(err);
         }
     });
@@ -110,23 +141,25 @@ function buildDataTree(rootObject) {
 
 function doQuery(currentNode, tree) {
     return new Promise((resolve, reject) => {
-        console.log("Doing query for :: " + currentNode.objectName);
+        logger.log("info", "Doing query for :: " + currentNode.objectName);
         let queryString = null;
 
         if (currentNode === tree.root) {
-            queryString = buildQueryString(currentNode, 100);
+            queryString = buildQueryString(currentNode, 1);
         } else {
             queryString = buildQueryString(currentNode, null);
         }
-        console.log(queryString);
+        logger.log(logPath, logger.debug.DEBUG, queryString);
 
         if (queryString) {
             query(queryString).then((records) => {
                 recordObject[currentNode.objectName] = records;
-                resolve(currentNode, tree);
+                resolve();
             }).catch((err) => {
-                console.log(err);
+                logger.log("error", err);
             });
+        } else {
+            resolve();
         }
     });
 }
@@ -157,57 +190,60 @@ function buildQueryString(currentNode, limit) {
             let fields = [];
             metadata.fields.forEach((field) => {
                 // To avoid grabbing readonly fields
-                if (field.updateable || field.name.includes("__c") || field.name === "Id")
+                if (field.createable /*|| field.name.includes("__c")*/ || field.name === "Id")
                     fields.push(field.name);
             });
             queryString += fields.join(",");
 
-            queryString += " FROM " + currentNode.objectName + " LIMIT ";
+            queryString += " FROM " + currentNode.objectName + " WHERE Id in ('a000Z00000ibcyVQAQ', 'a000Z00000ibcy5QAA') LIMIT ";
             queryString += limit;
         } else {
             let relField = null;
             let parents = recordObject[currentNode.parent.objectName];
             let conditionals = [];
 
-            currentNode.relatedFields.forEach((relatedField) => {
-                let recIds = [];
-                let conditional = "";
+            if (parents) {
+                currentNode.relatedFields.forEach((relatedField) => {
+                    let recIds = [];
+                    let conditional = "";
 
-                if (relatedField.relationshipType === 'lookup') {
-                    conditional += relatedField.fieldName + " IN (";
+                    if (relatedField.relationshipType === 'lookup') {
+                        conditional += relatedField.fieldName + " IN (";
 
-                    for (let i = 0; i < parents.length; i++) {
-                        recIds.push("'" + parents[i].Id + "'");
-                    }
+                        for (let i = 0; i < parents.length; i++) {
+                            recIds.push("'" + parents[i].Id + "'");
+                        }
 
 
-                } else {
-                    conditional += "Id IN (";
+                    } else {
+                        conditional += "Id IN (";
 
-                    for (let i = 0; i < parents.length; i++) {
-                        if (parents[i][relatedField.fieldName]) {
-                            recIds.push("'" + parents[i][relatedField.fieldName] + "'");
+                        for (let i = 0; i < parents.length; i++) {
+                            if (parents[i][relatedField.fieldName]) {
+                                recIds.push("'" + parents[i][relatedField.fieldName] + "'");
+                            }
                         }
                     }
-                }
 
-                if (recIds.length > 0) {
-                    conditional += recIds.join(",") + ")";
-                    conditionals.push(conditional);
-                }
-            });
+                    if (recIds.length > 0) {
+                        conditional += recIds.join(",") + ")";
+                        conditionals.push(conditional);
+                    }
+                });
+            }
 
+            if (conditionals.length > 0) {
+                queryString = "SELECT ";
+                let fields = [];
+                metadata.fields.forEach((field) => {
+                    if (field.createable /*|| field.name.includes("__c")*/ || field.name === "Id")
+                        fields.push(field.name);
+                });
+                queryString += fields.join(",");
 
-            queryString = "SELECT ";
-            let fields = [];
-            metadata.fields.forEach((field) => {
-                if (field.updateable || field.name.includes("__c") || field.name === "Id")
-                    fields.push(field.name);
-            });
-            queryString += fields.join(",");
-
-            queryString += " FROM " + currentNode.objectName + " WHERE ";
-            queryString += conditionals.join(" OR ");
+                queryString += " FROM " + currentNode.objectName + " WHERE ";
+                queryString += conditionals.join(" OR ");
+            }
         }
     }
 

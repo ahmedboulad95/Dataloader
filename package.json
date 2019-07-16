@@ -12,7 +12,9 @@
     "dotenv": "^8.0.0",
     "fs": "0.0.1-security",
     "jsforce": "^1.9.1",
-    "json2csv": "^4.5.1"
+    "json2csv": "^4.5.1",
+    "moment": "^2.24.0",
+    "winston": "^3.2.1"
   },
   "devDependencies": {
     "nodemon": "^1.19.1"

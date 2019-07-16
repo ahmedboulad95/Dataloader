@@ -1,4 +1,4 @@
-const Node = require("./Node.js");
+const Node = require("./Node.js/index.js");
 
 class Tree {
     constructor(data) {
