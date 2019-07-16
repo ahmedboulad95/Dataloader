@@ -1,9 +1,9 @@
 "use strict";
 
 const jsforce = require("jsforce");
-const utilities = require("./utilities.js");
-const logger = require("./logger.js");
-const orgKiller = require("./depopulate.js");
+const utilities = require("./includes/utilities.js");
+const logger = require("./includes/logger.js");
+const dataDump = require("./includes/dataDump.js");
 
 require('dotenv').config();
 
@@ -15,7 +15,7 @@ let recordObj = {};
 let objMetadata = {};
 let idMap = {};
 
-let order = require("./objectOrder.js").order.slice();
+let order = require("./includes/objectOrder.js").order.slice();
 
 let user = process.env.DEV_SF_DEST_ORG_USER;
 let pass = process.env.DEV_SF_DEST_ORG_PASS;
@@ -33,7 +33,7 @@ conn.login(user, pass + token, function (err, userInfo) {
 
     logger.log(logPath, logger.debug.INFO, `Logged into ${conn.instanceUrl} as ${userInfo.id}`);
 
-    orgKiller.destroy(conn, userInfo.id)
+    dataDump.destroy(conn, userInfo.id)
         .then((status) => {
             if (status === 1) throw "ABORT";
 

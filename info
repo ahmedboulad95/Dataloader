@@ -1,58 +1,0 @@
-2019-07-11 11:28:23 Doing query for :: Loan__c [constructTestSet.js]: undefined
-2019-07-11 11:28:23 Doing query for :: Account [constructTestSet.js]: undefined
-2019-07-11 11:28:24 Doing query for :: Import_File__c [constructTestSet.js]: undefined
-2019-07-11 11:28:24 Doing query for :: Terms__c [constructTestSet.js]: undefined
-2019-07-11 11:28:24 Doing query for :: Dealership_Assignment__c [constructTestSet.js]: undefined
-2019-07-11 11:28:24 Doing query for :: Batch_Assignment__c [constructTestSet.js]: undefined
-2019-07-11 11:28:24 Doing query for :: Case [constructTestSet.js]: undefined
-2019-07-11 11:28:25 Doing query for :: Discrepancy_LF__c [constructTestSet.js]: undefined
-2019-07-11 11:28:25 Doing query for :: Discrepancy__c [constructTestSet.js]: undefined
-2019-07-11 11:28:25 Doing query for :: Event [constructTestSet.js]: undefined
-2019-07-11 11:28:25 Doing query for :: FAQ__c [constructTestSet.js]: undefined
-2019-07-11 11:28:25 Doing query for :: Loan_Document__c [constructTestSet.js]: undefined
-2019-07-11 11:28:25 Doing query for :: Mailing__c [constructTestSet.js]: undefined
-2019-07-11 11:28:26 Doing query for :: Task [constructTestSet.js]: undefined
-2019-07-11 11:28:26 Doing query for :: Transaction__c [constructTestSet.js]: undefined
-2019-07-11 11:28:26 Doing query for :: Term_Assignment__c [constructTestSet.js]: undefined
-2019-07-11 11:28:26 Doing query for :: Batch__c [constructTestSet.js]: undefined
-2019-07-11 11:28:26 Doing query for :: Payment__c [constructTestSet.js]: undefined
-2019-07-11 11:28:26 Doing query for :: Opportunity [constructTestSet.js]: undefined
-2019-07-11 11:38:04 Doing query for :: Loan__c [constructTestSet.js]: undefined
-2019-07-11 11:38:04 Doing query for :: Account [constructTestSet.js]: undefined
-2019-07-11 11:38:04 Doing query for :: Import_File__c [constructTestSet.js]: undefined
-2019-07-11 11:38:04 Doing query for :: Terms__c [constructTestSet.js]: undefined
-2019-07-11 11:38:04 Doing query for :: Dealership_Assignment__c [constructTestSet.js]: undefined
-2019-07-11 11:38:05 Doing query for :: Batch_Assignment__c [constructTestSet.js]: undefined
-2019-07-11 11:38:05 Doing query for :: Case [constructTestSet.js]: undefined
-2019-07-11 11:38:05 Doing query for :: Discrepancy_LF__c [constructTestSet.js]: undefined
-2019-07-11 11:38:05 Doing query for :: Discrepancy__c [constructTestSet.js]: undefined
-2019-07-11 11:38:05 Doing query for :: Event [constructTestSet.js]: undefined
-2019-07-11 11:38:06 Doing query for :: FAQ__c [constructTestSet.js]: undefined
-2019-07-11 11:38:06 Doing query for :: Loan_Document__c [constructTestSet.js]: undefined
-2019-07-11 11:38:06 Doing query for :: Mailing__c [constructTestSet.js]: undefined
-2019-07-11 11:38:06 Doing query for :: Task [constructTestSet.js]: undefined
-2019-07-11 11:38:06 Doing query for :: Transaction__c [constructTestSet.js]: undefined
-2019-07-11 11:38:06 Doing query for :: Term_Assignment__c [constructTestSet.js]: undefined
-2019-07-11 11:38:07 Doing query for :: Batch__c [constructTestSet.js]: undefined
-2019-07-11 11:38:07 Doing query for :: Payment__c [constructTestSet.js]: undefined
-2019-07-11 11:38:07 Doing query for :: Opportunity [constructTestSet.js]: undefined
-2019-07-12 08:29:22 Doing query for :: Loan__c [constructTestSet.js]: undefined
-2019-07-12 08:29:23 Doing query for :: Account [constructTestSet.js]: undefined
-2019-07-12 08:29:23 Doing query for :: Import_File__c [constructTestSet.js]: undefined
-2019-07-12 08:29:23 Doing query for :: Terms__c [constructTestSet.js]: undefined
-2019-07-12 08:29:23 Doing query for :: Dealership_Assignment__c [constructTestSet.js]: undefined
-2019-07-12 08:29:23 Doing query for :: Batch_Assignment__c [constructTestSet.js]: undefined
-2019-07-12 08:29:23 Doing query for :: Case [constructTestSet.js]: undefined
-2019-07-12 08:29:24 Doing query for :: Discrepancy_LF__c [constructTestSet.js]: undefined
-2019-07-12 08:29:24 Doing query for :: Discrepancy__c [constructTestSet.js]: undefined
-2019-07-12 08:29:24 Doing query for :: Event [constructTestSet.js]: undefined
-2019-07-12 08:29:24 Doing query for :: FAQ__c [constructTestSet.js]: undefined
-2019-07-12 08:29:24 Doing query for :: Loan_Document__c [constructTestSet.js]: undefined
-2019-07-12 08:29:25 Doing query for :: Mailing__c [constructTestSet.js]: undefined
-2019-07-12 08:29:25 Doing query for :: Task [constructTestSet.js]: undefined
-2019-07-12 08:29:25 Doing query for :: Transaction__c [constructTestSet.js]: undefined
-2019-07-12 08:29:26 Doing query for :: Term_Assignment__c [constructTestSet.js]: undefined
-2019-07-12 08:29:26 Doing query for :: Batch__c [constructTestSet.js]: undefined
-2019-07-12 08:29:26 Doing query for :: Payment__c [constructTestSet.js]: undefined
-2019-07-12 08:29:26 Doing query for :: Opportunity [constructTestSet.js]: undefined
-

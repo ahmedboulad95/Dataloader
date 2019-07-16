@@ -1,3 +1,5 @@
+"use strict";
+
 const fs = require('fs');
 const moment = require('moment');
 const path = require('path');
@@ -25,6 +27,10 @@ exports.log = function (logPath, errorLevel, message) {
     let timeStamp = moment().format('YYYY-MM-DD HH:mm:ss');
     let callerFileName = path.basename(self._getCallerFile());
     logString += `${timeStamp} ${errorLevel} [${callerFileName}]: ${message}\n\r`;
+
+    if(errorLevel === debug.ERROR) {
+        exports.flush(logPath);
+    }
 }
 
 exports._getCallerFile = function () {

@@ -1,9 +1,9 @@
 "use strict";
 
 const jsforce = require("jsforce");
-const Tree = require("./Tree.js");
-const util = require("./utilities.js");
-const logger = require("./logger.js");
+const Tree = require("./includes/Tree.js/index.js");
+const util = require("./includes/utilities.js");
+const logger = require("./includes/logger.js");
 
 require('dotenv').config();
 

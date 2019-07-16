@@ -1,6 +1,6 @@
 "use strict";
 
-const logger = require("./logger.js");
+const logger = require("./includes/logger.js");
 
 const readline = require("readline").createInterface({
     input: process.stdin,
@@ -15,7 +15,7 @@ module.exports.destroy = function (conn, user) {
             if (decision.toLowerCase() === "y" || decision.toLowerCase() === "yes") {
                 console.log("Destroying database...");
 
-                let order = require("./objectOrder.js").order.slice();
+                let order = require("./includes/objectOrder.js").order.slice();
                 executeOrder66(order.pop(), order, conn).then(() => {
                     resolve(0);
                 }).catch((err) => {

@@ -6,3 +6,4 @@ Logs/
 .env
 test.js
 logCommentor.js
+deprecated/
