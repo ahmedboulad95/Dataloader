@@ -1,7 +1,7 @@
 "use strict";
 
 const jsforce = require("jsforce");
-const Tree = require("./includes/Tree.js/index.js");
+const Tree = require("./includes/Tree.js");
 const util = require("./includes/utilities.js");
 const logger = require("./includes/logger.js");
 
@@ -15,13 +15,17 @@ let recordObject = {};
 let permittedObjects = null;
 let explorableObjects = null;
 
+let userId = "";
+
 const logPath = "./logs/constructTestSet.log";
 
 conn.login(process.env.DEV_SF_SOURCE_ORG_USER, process.env.DEV_SF_SOURCE_ORG_PASS + process.env.DEV_SF_SOURCE_ORG_TOKEN, (err, userInfo) => {
     if (err) logger.log("error", err);
 
+    userId = userInfo.id;
+
     logger.log(logPath, logger.debug.INFO, "Logged into " + conn.instanceUrl + " as " + userInfo.id);
-    util.readFile("./objectRes.json")
+    util.readFile("./includes/objectRes.json")
         .then((data) => {
             let d = JSON.parse(data);
             permittedObjects = d["permittedObjects"];
@@ -153,6 +157,11 @@ function doQuery(currentNode, tree) {
 
         if (queryString) {
             query(queryString).then((records) => {
+                for(let i = 0; i < records.length; i++) {
+                    if(records[i].OwnerId)
+                        records[i].OwnerId = userId;
+                }
+
                 recordObject[currentNode.objectName] = records;
                 resolve();
             }).catch((err) => {
@@ -195,8 +204,8 @@ function buildQueryString(currentNode, limit) {
             });
             queryString += fields.join(",");
 
-            queryString += " FROM " + currentNode.objectName + " WHERE Id in ('a000Z00000ibcyVQAQ', 'a000Z00000ibcy5QAA') LIMIT ";
-            queryString += limit;
+            queryString += " FROM " + currentNode.objectName + " WHERE Id in ('a000Z00000ibcyVQAQ', 'a000Z00000ibcy5QAA')  ";
+            //queryString += limit;
         } else {
             let relField = null;
             let parents = recordObject[currentNode.parent.objectName];
