@@ -13,8 +13,8 @@ let loginOptions = { loginUrl: process.env.DEV_SF_SOURCE_ORG_URL };
 let conn = new jsforce.Connection(loginOptions);
 let recordObject = {};
 
-let permittedObjects = null;
-let explorableObjects = null;
+let permittedObjects = require("./includes/objectOrder.js").permittedObjects.slice();
+let explorableObjects = require("./includes/objectOrder.js").explorableObjects.slice();
 
 let userId = "";
 
@@ -30,61 +30,53 @@ conn.login(process.env.DEV_SF_SOURCE_ORG_USER, process.env.DEV_SF_SOURCE_ORG_PAS
     userId = userInfo.id;
 
     logger.log(logPath, logger.debug.INFO, "Logged into " + conn.instanceUrl + " as " + userInfo.id);
-    util.readFile("./includes/objectRes.json")
-        .then((data) => {
-            logger.log(logPath, logger.debug.INFO, `Read permitted/explorable objects file :: ${data}`);
-            console.log("Read objectRes");
-            let d = JSON.parse(data);
-            permittedObjects = d["permittedObjects"];
-            explorableObjects = d["explorableObjects"];
-            return buildMetadataMap();
-        }).then(() => {
-            let keys = Object.keys(objectMetadataMap);
-            for (let i = 0; i < keys.length; i++) {
-                if (!objectMetadataMap[keys[i]]) {
-                    delete objectMetadataMap[keys[i]];
-                }
+    buildMetadataMap().then(() => {
+        let keys = Object.keys(objectMetadataMap);
+        for (let i = 0; i < keys.length; i++) {
+            if (!objectMetadataMap[keys[i]]) {
+                delete objectMetadataMap[keys[i]];
             }
-            console.log("Finished building metadata map");
-            logger.log(logPath, logger.debug.INFO, "Finished building metadata map");
-            logger.log(logPath, logger.debug.INFO, "Object metadata map keys :: " + Object.keys(objectMetadataMap));
-            return buildDataTree("Loan__c");
-        }).then((res) => {
-            console.log("Finished building data tree");
-            let tree = res;
-            tree.print();
-            //logger.log(logPath, logger.debug.INFO, "Tree :: " + tree.print());
-            logger.log(logPath, logger.debug.INFO, JSON.stringify(tree, (key, value) => {
-                if (key === "parent") {
-                    return undefined;
-                }
-                return value;
-            }));
-            util.writeFile("./Data/tree.json", JSON.stringify(tree, (key, value) => {
-                if (key === "parent") {
-                    return undefined;
-                }
-                return value;
-            })).catch(err => logger.log("error", err));
-            return buildRecordObject(tree.root, [], tree);
-        }).then(() => {
-            console.log("Finished building record object");
-            logger.log(logPath, logger.debug.INFO, "Finished building record object :: Size " + Object.keys(recordObject).length);
-
-            let keys = Object.keys(recordObject);
-            for (let i = 0; i < keys.length; i++) {
-                if (recordObject[keys[i]].length === 0) {
-                    console.log(`Deleting ${keys[i]}`);
-                    delete recordObject[keys[i]];
-                }
+        }
+        console.log("Finished building metadata map");
+        logger.log(logPath, logger.debug.INFO, "Finished building metadata map");
+        logger.log(logPath, logger.debug.INFO, "Object metadata map keys :: " + Object.keys(objectMetadataMap));
+        return buildDataTree("Loan__c");
+    }).then((res) => {
+        console.log("Finished building data tree");
+        let tree = res;
+        tree.print();
+        //logger.log(logPath, logger.debug.INFO, "Tree :: " + tree.print());
+        logger.log(logPath, logger.debug.INFO, JSON.stringify(tree, (key, value) => {
+            if (key === "parent") {
+                return undefined;
             }
+            return value;
+        }));
+        util.writeFile("./Data/tree.json", JSON.stringify(tree, (key, value) => {
+            if (key === "parent") {
+                return undefined;
+            }
+            return value;
+        })).catch(err => logger.log("error", err));
+        return buildRecordObject(tree.root, [], tree);
+    }).then(() => {
+        console.log("Finished building record object");
+        logger.log(logPath, logger.debug.INFO, "Finished building record object :: Size " + Object.keys(recordObject).length);
 
-            util.createDir("./" + process.env.DATA_FOLDER_NAME);
-            util.writeFile("./" + process.env.DATA_FOLDER_NAME + "/" + process.env.DATA_FILE_NAME, JSON.stringify(recordObject)).catch(err => logger.log("error", err));
-            util.writeFile("./" + process.env.DATA_FOLDER_NAME + "/" + process.env.METADATA_FILE_NAME, JSON.stringify(objectMetadataMap)).catch(err => logger.log("error", err));
-        }).catch((err) => {
-            logger.log(logPath, logger.debug.ERROR, err);
-        });
+        let keys = Object.keys(recordObject);
+        for (let i = 0; i < keys.length; i++) {
+            if (recordObject[keys[i]].length === 0) {
+                console.log(`Deleting ${keys[i]}`);
+                delete recordObject[keys[i]];
+            }
+        }
+
+        util.createDir("./" + process.env.DATA_FOLDER_NAME);
+        util.writeFile("./" + process.env.DATA_FOLDER_NAME + "/" + process.env.DATA_FILE_NAME, JSON.stringify(recordObject)).catch(err => logger.log("error", err));
+        util.writeFile("./" + process.env.DATA_FOLDER_NAME + "/" + process.env.METADATA_FILE_NAME, JSON.stringify(objectMetadataMap)).catch(err => logger.log("error", err));
+    }).catch((err) => {
+        logger.log(logPath, logger.debug.ERROR, err);
+    });
 });
 
 function buildMetadataMap() {
@@ -247,7 +239,8 @@ function buildQueryString(currentNode, limit) {
             });
 
             //queryString = `SELECT ${fields.join(",")} FROM ${currentNode.objectName} LIMIT ${limit}`;
-            queryString = `SELECT ${fields.join(",")} FROM ${currentNode.objectName} WHERE Id in ('a000Z00000ibcyVQAQ', 'a000Z00000ibcy5QAA')`;
+            //queryString = `SELECT ${fields.join(",")} FROM ${currentNode.objectName} WHERE Id in ('a000Z00000ibcyVQAQ', 'a000Z00000ibcy5QAA', 'a000Z00000iU2xkQAC')`;
+            queryString = `SELECT ${fields.join(",")} FROM ${currentNode.objectName} WHERE Id in ('a000Z00000cUkojQAC', 'a000Z00000cUkooQAC', 'a000Z00000cUkpDQAS')`;
         } else {
             let parents = recordObject[currentNode.parent.objectName];
             let conditionals = [];
@@ -296,4 +289,18 @@ function buildQueryString(currentNode, limit) {
 
     //console.log(queryString);
     return queryString;
+}
+
+function isUserActive(userId) {
+    return new Promise((resolve, reject) => {
+        query(`SELECT IsActive FROM User WHERE Id = '${userId}'`).then((records) => {
+            if (records) {
+                resolve(records[0].IsActive);
+            }
+        }).catch(err => reject(err));
+    });
+}
+
+function updateOwners() {
+
 }

@@ -8,7 +8,7 @@ const dataDump = require("./includes/dataDump.js");
 require('dotenv').config();
 
 // Establish a connection to Salesforce
-let loginOptions = { loginUrl: process.env.DEV_SF_DEST_ORG_URL };
+let loginOptions = { loginUrl: process.env.SF_DEST_ORG_URL };
 
 let conn = new jsforce.Connection(loginOptions);
 let recordObj = {};
@@ -19,13 +19,16 @@ let userId = "";
 
 let order = require("./includes/objectOrder.js").order.slice();
 
-let user = process.env.DEV_SF_DEST_ORG_USER;
-let pass = process.env.DEV_SF_DEST_ORG_PASS;
-let token = process.env.DEV_SF_DEST_ORG_TOKEN;
+let user = process.env.SF_DEST_ORG_USER;
+let pass = process.env.SF_DEST_ORG_PASS;
+let token = process.env.SF_DEST_ORG_TOKEN;
 
 const logPath = "./logs/push.log";
 
 logger.log(logPath, logger.debug.INFO, `Logging into ${loginOptions.loginUrl} as ${user}`);
+console.log(user);
+console.log(pass);
+console.log(token);
 conn.login(user, pass + token, function (err, userInfo) {
     if (err) {
         logger.log(logPath, logger.debug.ERROR, `Error logging in :: ${err}`);
@@ -44,8 +47,8 @@ conn.login(user, pass + token, function (err, userInfo) {
                 throw "ABORT";
             }
 
-            return utilities.readFile("./" + process.env.DATA_FOLDER_NAME + "/" + process.env.DATA_FILE_NAME);
-        }).then((data) => {
+            return utilities.readFile("./" + process.env.DATA_FOLDER_NAME + "/" + process.env.DATA_FILE_NAME)
+        .then((data) => {
             if (!data) {
                 logger.log(logPath, logger.debug.ERROR, `Error reading file: ./${process.env.DATA_FOLDER_NAME}/${process.env.DATA_FILE_NAME} does not exist or is corrupted`);
                 console.log(`Error reading file ${process.env.DATA_FILE_NAME}. See logs for details`);
