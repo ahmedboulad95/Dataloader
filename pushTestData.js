@@ -1,6 +1,7 @@
 "use strict";
 
 const jsforce = require("jsforce");
+const fs = require("fs");
 const utilities = require("./includes/utilities.js");
 const logger = require("./includes/logger.js");
 const dataDump = require("./includes/dataDump.js");
@@ -8,7 +9,7 @@ const dataDump = require("./includes/dataDump.js");
 require('dotenv').config();
 
 // Establish a connection to Salesforce
-let loginOptions = { loginUrl: process.env.SF_DEST_ORG_URL };
+let loginOptions = { loginUrl: process.env.DEV_SF_DEST_ORG_URL };
 
 let conn = new jsforce.Connection(loginOptions);
 let recordObj = {};
@@ -19,9 +20,9 @@ let userId = "";
 
 let order = require("./includes/objectOrder.js").order.slice();
 
-let user = process.env.SF_DEST_ORG_USER;
-let pass = process.env.SF_DEST_ORG_PASS;
-let token = process.env.SF_DEST_ORG_TOKEN;
+let user = process.env.DEV_SF_DEST_ORG_USER;
+let pass = process.env.DEV_SF_DEST_ORG_PASS;
+let token = process.env.DEV_SF_DEST_ORG_TOKEN;
 
 const logPath = "./logs/push.log";
 
@@ -239,3 +240,16 @@ function updateRecords(records, objectName) {
     });
 }
 
+/*function addAttachmentDoc() {
+    return new Promise((resolve, reject) => {
+        let attachments = recordObj["Attachment"];
+        attachments.forEach((attachment) => {
+            fs.readFile(`./attachments/${attachment.Id}.pdf`, (err, data) => {
+                if(err) reject(err);
+
+                let base64Data = new Buffer(data).toString("base64");
+                attachment.Body = base64Data;
+            });
+        });
+    });
+}*/
