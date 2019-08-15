@@ -15,6 +15,7 @@
     "json2csv": "^4.5.1",
     "lodash": "^4.17.14",
     "moment": "^2.24.0",
+    "pdfkit": "^0.10.0",
     "winston": "^3.2.1"
   },
   "devDependencies": {
