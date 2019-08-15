@@ -7,6 +7,7 @@ module.exports.order = [
     "Batch__c",
     "Batch_Assignment__c",
     "Mailing__c",
+    "Attachment",
     "Discrepancy_LF__c",
     "Discrepancy__c",
     "Loan_Document__c",
@@ -32,12 +33,13 @@ module.exports.permittedObjects = [
     "Discrepancy_LF__c",
     "Discrepancy__c",
     "Event",
-    "FAQ__c",
+    /*"FAQ__c",*/
     "Import_File__c",
     "Lead",
     "Loan__c",
     "Loan_Document__c",
     "Mailing__c",
+    "Attachment",
     "Opportunity",
     "Payment__c",
     "Task",
@@ -52,5 +54,6 @@ module.exports.explorableObjects = [
     "Terms__c",
     "Term_Assignment__c",
     "Batch_Assignment__c",
-    "Transaction__c"
+    "Transaction__c",
+    "Mailing__c"
 ]
