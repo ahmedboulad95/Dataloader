@@ -330,20 +330,18 @@ function fetchAttachments(attachments) {
 function downloadAttachment(attachment) {
     return new Promise((resolve, reject) => {
         console.log(`Downloading ${attachment.Id}`);
+
         let fileOut = fs.createWriteStream(`./attachments/${attachment.Id}.pdf`);
-        let stream = conn.sobject("Attachment")
-            .record(attachment.Id)
-            .blob("Body");
-            //.pipe(fileOut);
-        //stream.on("finish", () => resolve());
-        //stream.on("error", err => reject(err));
-        let data = "";
+        let stream = conn.sobject("Attachment").record(attachment.Id).blob("Body").pipe(fileOut);
+
         stream.on("error", err => reject(err));
-        stream.on("data", chunk => {data += chunk});
         stream.on("end", () => {
-            attachment["Body"] = new Buffer.from(data).toString("base64");
-            console.log(`Body ${attachment.Body}`);
-            resolve();
+            fs.readFile(`./attachments/${attachment.Id}.pdf`, (err, data) => {
+                if(err) reject(err);
+
+                attachment["Body"] = new Buffer.from(data).toString("base64");
+                resolve();
+            });
         });
     });
 }
